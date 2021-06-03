@@ -16,7 +16,10 @@
     "@nuxtjs/pwa": "^3.3.5",
     "core-js": "^3.9.1",
     "mapbox-gl": "^2.2.0",
-    "nuxt": "^2.15.3"
+    "nuxt": "^2.15.3",
+    "ol": "^6.5.0",
+    "ol-mapbox-style": "^6.3.2",
+    "vue-mapbox": "^0.4.1"
   },
   "devDependencies": {
     "@nuxt/types": "^2.15.6",
