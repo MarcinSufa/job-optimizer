@@ -15,34 +15,29 @@
       <div class="map-wrapper map-container">
         <client-only>
           <l-map ref="map" :zoom="13" :center="[55.9464418, 8.1277591]">
-            <l-tile-layer :url="urlMapboxStyle"></l-tile-layer>
+            <l-tile-layer :url="urlMapboxStyle"> </l-tile-layer>
             <l-marker
               :ref="m.ref"
               v-for="m in markers"
               :key="m.id"
-              :lat-lng="m.latLng"
-              :bouncemarker="true"
+              :latLng="m.latLng"
             >
-              <l-popup>
-                <slot>
-                  {{ m.jobTitle }}
-                  <button @click="goToOfferPage">show</button>
-                  <span> {{ m.description }}</span>
-                </slot>
-              </l-popup>
-            </l-marker>
-          </l-map>
-        </client-only>
+              <marker-tooltip
+                :markerInfo="m"
+              ></marker-tooltip> </l-marker></l-map
+        ></client-only>
       </div>
     </v-col>
   </v-row>
 </template>
 
 <script>
-import jobCard from '~/components/cards/jobCard'
+import jobCard from '@/components/cards/jobCard'
+import markerTooltip from '@/components/map/markers/markerTooltip'
 export default {
   components: {
     jobCard,
+    markerTooltip,
   },
   data() {
     return {
@@ -114,9 +109,6 @@ export default {
   },
   computed: {},
   methods: {
-    goToOfferPage(e) {
-      console.log(e)
-    },
     showToltip(tooltipRef, isActive) {
       isActive
         ? this.$refs[tooltipRef][0].mapObject.openPopup()
