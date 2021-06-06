@@ -21,6 +21,9 @@
           @click.prevent="$emit('showToltip', jobData.ref, jobData.active)"
           >show route</v-btn
         >
+        <v-btn @click.prevent="$emit('calculateOffer', jobData)">
+          calculate Offer
+        </v-btn>
       </v-card-actions>
     </v-card>
   </v-hover>

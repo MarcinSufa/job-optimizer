@@ -7,6 +7,7 @@
         :jobData="card"
         class="job-position-card"
         @showToltip="showToltip"
+        @calculateOffer="calculateTravelTime"
         @activeCard="activeCard"
       >
       </job-card>
@@ -55,6 +56,7 @@ export default {
         duration: null,
         type: null,
       },
+      markerTimeTravel: {},
       markers: [
         {
           id: 1,
@@ -158,6 +160,21 @@ export default {
       isActive
         ? this.$refs[tooltipRef][0].mapObject.openPopup()
         : this.$refs[tooltipRef][0].mapObject.closePopup()
+    },
+    async calculateTravelTime(marker) {
+      const jobOfferLocalization = `${[...marker.latLng]}`
+      const userLocalization = `${this.userLatitude},${this.userLongitude}`
+      // console.log(
+      //   `http://router.project-osrm.org/route/v1/driving/${jobOfferLocalization};${userLocalization}`
+      // )
+      const travelData = await fetch(
+        `http://router.project-osrm.org/route/v1/driving/${jobOfferLocalization};${userLocalization}?overview=false`
+      )
+
+      // const response = await travelData
+      console.log(travelData)
+      this.markerTimeTravel = await travelData
+      // await this.markerTimeTravel = JSON.parse(travelData)
     },
     activeCard(jobData, isActive) {
       if (isActive) {
