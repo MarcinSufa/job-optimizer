@@ -9,8 +9,9 @@
       <v-card-text>
         <div>
           {{ jobData.description }}
-          time: <br />
-          travel type:
+          <br />
+          time: {{ jobData.commute.travelTime }} minutes<br />
+          distance {{ jobData.commute.distance }} km <br />type:
         </div>
         <div></div>
       </v-card-text>

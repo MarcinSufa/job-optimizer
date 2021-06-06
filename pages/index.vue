@@ -14,19 +14,16 @@
     </v-col>
     <v-col class="d-flex" cols="6" sm="12" md="6">
       <div class="map-wrapper map-container">
-        <client-only>
-          <l-map ref="map" :zoom="13" :center="[55.9464418, 8.1277591]">
-            <l-tile-layer :url="urlMapboxStyle"> </l-tile-layer>
-            <l-marker
-              :ref="m.ref"
-              v-for="m in markers"
-              :key="m.id"
-              :latLng="m.latLng"
-            >
-              <marker-tooltip
-                :markerInfo="m"
-              ></marker-tooltip> </l-marker></l-map
-        ></client-only>
+        <l-map ref="map" :zoom="13" :center="[55.9464418, 8.1277591]">
+          <l-tile-layer :url="urlMapboxStyle"> </l-tile-layer>
+          <l-marker
+            :ref="m.ref"
+            v-for="m in markers"
+            :key="m.id"
+            :latLng="m.latLng"
+          >
+            <marker-tooltip :markerInfo="m"></marker-tooltip> </l-marker
+        ></l-map>
       </div>
     </v-col>
   </v-row>
@@ -71,6 +68,10 @@ export default {
           currency: 'pln',
           latLng: [55.9464418, 8.1277591],
           ref: 'ref1',
+          commute: {
+            travelTime: null,
+            distance: null,
+          },
           active: true,
         },
         {
@@ -86,6 +87,10 @@ export default {
           currency: 'pln',
           latLng: [52.22977, 21.01178],
           ref: 'ref2',
+          commute: {
+            travelTime: null,
+            distance: null,
+          },
           active: true,
         },
         {
@@ -101,6 +106,10 @@ export default {
           currency: 'pln',
           latLng: [52.23977, 21.02178],
           ref: 'ref3',
+          commute: {
+            travelTime: null,
+            distance: null,
+          },
           active: true,
         },
       ],
@@ -162,19 +171,26 @@ export default {
         : this.$refs[tooltipRef][0].mapObject.closePopup()
     },
     async calculateTravelTime(marker) {
-      const jobOfferLocalization = `${[...marker.latLng]}`
-      const userLocalization = `${this.userLatitude},${this.userLongitude}`
-      // console.log(
-      //   `http://router.project-osrm.org/route/v1/driving/${jobOfferLocalization};${userLocalization}`
-      // )
+      const jobOfferLocalization = `${marker.latLng[1]},${marker.latLng[0]}`
+      const userLocalization = `${this.userLongitude},${this.userLatitude}`
+
       const travelData = await fetch(
         `http://router.project-osrm.org/route/v1/driving/${jobOfferLocalization};${userLocalization}?overview=false`
-      )
+      ).catch((error) => {
+        console.log(error)
+      })
+      const data = await travelData.json()
 
-      // const response = await travelData
-      console.log(travelData)
-      this.markerTimeTravel = await travelData
-      // await this.markerTimeTravel = JSON.parse(travelData)
+      const markerToUpdate = this.markers.find((m) => m.id === marker.id)
+      const markerCommuteData = data?.routes[0]
+
+      markerToUpdate.commute.travelTime = (
+        markerCommuteData.duration / 60
+      ).toFixed(0)
+
+      markerToUpdate.commute.distance = (
+        markerCommuteData.distance / 1000
+      ).toFixed(2)
     },
     activeCard(jobData, isActive) {
       if (isActive) {
