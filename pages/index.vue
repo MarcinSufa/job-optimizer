@@ -1,6 +1,6 @@
 <template>
   <v-row justify="center" align="center">
-    <v-col cols="6" sm="12" md="6">
+    <v-col class="d-flex cards-wrapper" cols="6" sm="12" md="6">
       <job-card
         v-for="card in markers"
         :key="card.id"
@@ -11,7 +11,7 @@
       >
       </job-card>
     </v-col>
-    <v-col cols="6" sm="12" md="6">
+    <v-col class="d-flex" cols="6" sm="12" md="6">
       <div class="map-wrapper map-container">
         <client-only>
           <l-map ref="map" :zoom="13" :center="[55.9464418, 8.1277591]">
@@ -145,6 +145,10 @@ export default {
 .map-container {
   height: 500px;
   width: 500px;
+}
+
+.cards-wrapper {
+  flex-direction: column;
 }
 
 .activeMarker {

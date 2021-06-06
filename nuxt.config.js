@@ -46,6 +46,7 @@ export default {
     // https://go.nuxtjs.dev/pwa
     '@nuxtjs/pwa',
     'nuxt-leaflet',
+    'mapbox-gl-leaflet',
   ],
 
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
