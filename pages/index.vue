@@ -2,7 +2,7 @@
   <v-row justify="center" align="center">
     <v-col class="d-flex cards-wrapper" cols="6" sm="12" md="6">
       <job-card
-        v-for="card in markers"
+        v-for="card in jobOffersMaker"
         :key="card.id"
         :jobData="card"
         class="job-position-card"
@@ -58,6 +58,7 @@ export default {
       markers: [
         {
           id: 1,
+          type: 'jobOffer',
           company: 'Aple',
           jobTitle: 'Frontend developer',
           tech: ['javascript', 'react', 'webpack', 'node', 'css'],
@@ -72,6 +73,7 @@ export default {
         },
         {
           id: 2,
+          type: 'jobOffer',
           company: 'Microsoft',
           jobTitle: 'Frontend developer',
           tech: ['javascript', 'react', 'webpack', 'node', 'css'],
@@ -86,6 +88,7 @@ export default {
         },
         {
           id: 3,
+          type: 'jobOffer',
           company: 'Netflix',
           jobTitle: 'Frontend developer',
           tech: ['javascript', 'react', 'webpack', 'node', 'css'],
@@ -107,8 +110,50 @@ export default {
       travelType: 'driving',
     }
   },
-  computed: {},
+  mounted() {
+    if (!this.coordinates) {
+      this.getGeoLocalization()
+    }
+  },
+  computed: {
+    coordinates() {
+      if (this.userLatitude && this.userLongitude) {
+        return [this.userLongitude, this.userLatitude]
+      }
+      return null
+    },
+    jobOffersMaker() {
+      return this.markers.filter((m) => m.type === 'jobOffer')
+    },
+  },
   methods: {
+    getGeoLocalization() {
+      navigator.geolocation.getCurrentPosition(
+        this.getGeoLocalSuccess,
+        this.getGeoLocalError
+      )
+    },
+    getGeoLocalSuccess(position) {
+      this.userLatitude = position.coords.latitude
+      this.userLongitude = position.coords.longitude
+      const markerUserLocation = this.createUserLocalizationMarker(
+        position.coords.latitude,
+        position.coords.longitude
+      )
+      this.markers.push(markerUserLocation)
+    },
+    createUserLocalizationMarker(lat, lng) {
+      return {
+        id: 9999,
+        type: 'userLocalization',
+        latLng: [lat, lng],
+        ref: 'userMarker',
+        active: true,
+      }
+    },
+    getGeoLocalError(error) {
+      console.log(error)
+    },
     showToltip(tooltipRef, isActive) {
       isActive
         ? this.$refs[tooltipRef][0].mapObject.openPopup()
