@@ -14,16 +14,29 @@
     </v-col>
     <v-col class="d-flex" cols="6" sm="12" md="6">
       <div class="map-wrapper map-container">
-        <l-map ref="map" :zoom="13" :center="[55.9464418, 8.1277591]">
-          <l-tile-layer :url="urlMapboxStyle"> </l-tile-layer>
-          <l-marker
-            :ref="m.ref"
-            v-for="m in markers"
-            :key="m.id"
-            :latLng="m.latLng"
-          >
-            <marker-tooltip :markerInfo="m"></marker-tooltip> </l-marker
-        ></l-map>
+        <client-only>
+          <l-map ref="map" :zoom="11" :center="[52.2464418, 21.1277591]">
+            <l-tile-layer :url="urlMapboxStyle"> </l-tile-layer>
+            <l-polyline
+              v-if="polylineCoords"
+              :lat-lngs="polylineCoords"
+              :color="polyline.color"
+            ></l-polyline>
+            <l-marker
+              :ref="m.ref"
+              v-for="m in markers"
+              :key="m.id"
+              :latLng="m.latLng"
+            >
+              <l-icon
+                :icon-size="iconSize"
+                :icon-anchor="iconAnchor"
+                icon-url="icons/apple-original.svg"
+              >
+              </l-icon>
+              <marker-tooltip :markerInfo="m"></marker-tooltip> </l-marker
+          ></l-map>
+        </client-only>
       </div>
     </v-col>
   </v-row>
@@ -42,6 +55,8 @@ export default {
       mapApiKey:
         'pk.eyJ1IjoiYWxleG1hbHkiLCJhIjoiY2o1OGN5aXR0MHp1ODJ3cDN3cmI4a2dkbSJ9.uR1Bix3JXHGJkz1dxXt3NA',
       urlMapboxStyle:
+        'https://{s}.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}.png',
+      urlMapboxStyle2:
         'https://api.mapbox.com/styles/v1/alexmaly/ckph4rwbn029g17p4b5pvvg3s/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoiYWxleG1hbHkiLCJhIjoiY2o1OGN5aXR0MHp1ODJ3cDN3cmI4a2dkbSJ9.uR1Bix3JXHGJkz1dxXt3NA',
       userLatitude: null,
       userLongitude: null,
@@ -53,7 +68,10 @@ export default {
         duration: null,
         type: null,
       },
+      toggleRoute: false,
       markerTimeTravel: {},
+      iconSize: [32, 32],
+      iconAnchor: [16, 0],
       markers: [
         {
           id: 1,
@@ -66,7 +84,7 @@ export default {
           address: 'Marszałkowska 45a',
           salary: 17000,
           currency: 'pln',
-          latLng: [55.9464418, 8.1277591],
+          latLng: [52.2464418, 21.1277591],
           ref: 'ref1',
           commute: {
             travelTime: null,
@@ -113,11 +131,21 @@ export default {
           active: true,
         },
       ],
+      polyline: {
+        color: 'green',
+      },
+      testPolyline: [
+        [47.334852, -1.509485],
+        [47.342596, -1.328731],
+        [47.241487, -1.190568],
+        [47.234787, -1.358337],
+      ],
       travelTypes: {
         walking: 'walking',
         driving: 'driving',
         cycling: 'cycling',
       },
+      jobCoordsForRoute: [],
       travelType: 'driving',
     }
   },
@@ -135,6 +163,12 @@ export default {
     },
     jobOffersMaker() {
       return this.markers.filter((m) => m.type === 'jobOffer')
+    },
+    polylineCoords() {
+      if (this.jobCoordsForRoute.length > 0) {
+        return [[this.userLatitude, this.userLongitude], this.jobCoordsForRoute]
+      }
+      return null
     },
   },
   methods: {
@@ -173,14 +207,13 @@ export default {
     async calculateTravelTime(marker) {
       const jobOfferLocalization = `${marker.latLng[1]},${marker.latLng[0]}`
       const userLocalization = `${this.userLongitude},${this.userLatitude}`
-
+      this.jobCoordsForRoute = [marker.latLng[0], marker.latLng[1]]
       const travelData = await fetch(
         `http://router.project-osrm.org/route/v1/driving/${jobOfferLocalization};${userLocalization}?overview=false`
       ).catch((error) => {
         console.log(error)
       })
       const data = await travelData.json()
-
       const markerToUpdate = this.markers.find((m) => m.id === marker.id)
       const markerCommuteData = data?.routes[0]
 
@@ -194,7 +227,7 @@ export default {
     },
     activeCard(jobData, isActive) {
       if (isActive) {
-        this.centerMap(jobData.latLng, 10)
+        this.centerMap(jobData.latLng, 11)
       }
       this.toggleMarkerAnimation(jobData.ref, isActive)
     },
@@ -211,18 +244,14 @@ export default {
 }
 </script>
 <style lang="scss">
-.map {
-  height: 550px;
-  width: 100%;
-}
 .map-wrapper {
   height: 90%;
   position: relative;
 }
 
 .map-container {
-  height: 500px;
-  width: 500px;
+  height: 80vh;
+  width: 50vw;
 }
 
 .cards-wrapper {
