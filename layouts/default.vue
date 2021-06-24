@@ -36,7 +36,7 @@
       </v-btn>
     </v-app-bar>
     <v-main>
-      <v-container fill-height>
+      <v-container fluid fill-height>
         <nuxt />
       </v-container>
     </v-main>

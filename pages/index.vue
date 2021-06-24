@@ -1,49 +1,65 @@
 <template>
   <v-row justify="center" align="center">
-    <v-col cols="6" sm="12" md="6">
-      <v-card class="job-position-card">
-        <v-card-title class="headline"> Apple Warsaw </v-card-title>
-        <v-card-text>
-          <div>
-            time: {{ travel.duration }} <br />
-            travel type: {{ travelType }}
-          </div>
-          <div></div>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn color="primary" @click="showRoute">show route</v-btn>
-        </v-card-actions>
-      </v-card>
-      <v-card class="job-position-card">
-        <v-card-title class="headline"> Google Warsaw </v-card-title>
-        <v-card-text>
-          <div>
-            time: {{ travel.duration }} <br />
-            travel type: {{ travelType }}
-          </div>
-          <div></div>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn color="primary" @click="showRoute">show route</v-btn>
-        </v-card-actions>
-      </v-card>
+    <v-col class="d-flex cards-wrapper" cols="6" sm="12" md="6">
+      <job-card
+        v-for="card in jobOffersMaker"
+        :key="card.id"
+        :jobData="card"
+        :travelTime="card.commute.travelTime"
+        :travelDistance="card.commute.distance"
+        class="job-position-card"
+        @showToltip="showToltip"
+        @calculateOffer="calculateTravelTime"
+        @activeCard="activeCard"
+      >
+      </job-card>
     </v-col>
-    <v-col cols="6" sm="12" md="6">
-      <div class="map-wrapper" id="mapContainer"></div>
+    <v-col class="d-flex" cols="6" sm="12" md="6">
+      <div class="map-wrapper map-container">
+        <client-only>
+          <l-map ref="map" :zoom="11" :center="[52.2464418, 21.1277591]">
+            <l-tile-layer :url="urlMapboxStyle"> </l-tile-layer>
+            <l-polyline
+              v-if="polylineCoords"
+              :lat-lngs="polylineCoords"
+              :color="polyline.color"
+            ></l-polyline>
+            <l-marker
+              :ref="m.ref"
+              v-for="m in markers"
+              :key="m.id"
+              :latLng="m.latLng"
+            >
+              <l-icon
+                :icon-size="iconSize"
+                :icon-anchor="iconAnchor"
+                icon-url="icons/apple-original.svg"
+              >
+              </l-icon>
+              <marker-tooltip :markerInfo="m"></marker-tooltip> </l-marker
+          ></l-map>
+        </client-only>
+      </div>
     </v-col>
   </v-row>
 </template>
 
 <script>
-import mapboxGl from 'mapbox-gl'
-
+import jobCard from '@/components/cards/jobCard'
+import markerTooltip from '@/components/map/markers/markerTooltip'
 export default {
+  components: {
+    jobCard,
+    markerTooltip,
+  },
   data() {
     return {
       mapApiKey:
         'pk.eyJ1IjoiYWxleG1hbHkiLCJhIjoiY2o1OGN5aXR0MHp1ODJ3cDN3cmI4a2dkbSJ9.uR1Bix3JXHGJkz1dxXt3NA',
+      urlMapboxStyle:
+        'https://{s}.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}.png',
+      urlMapboxStyle2:
+        'https://api.mapbox.com/styles/v1/alexmaly/ckph4rwbn029g17p4b5pvvg3s/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoiYWxleG1hbHkiLCJhIjoiY2o1OGN5aXR0MHp1ODJ3cDN3cmI4a2dkbSJ9.uR1Bix3JXHGJkz1dxXt3NA',
       userLatitude: null,
       userLongitude: null,
       mapGL: {},
@@ -54,12 +70,90 @@ export default {
         duration: null,
         type: null,
       },
+      toggleRoute: false,
+      markerTimeTravel: {},
+      iconSize: [32, 32],
+      iconAnchor: [16, 16],
+      markers: [
+        {
+          id: 1,
+          type: 'jobOffer',
+          company: 'Aple',
+          jobTitle: 'Frontend developer',
+          tech: ['javascript', 'react', 'webpack', 'node', 'css'],
+          description: 'We are looking for frontend dev',
+          city: 'Warsaw',
+          address: 'Marszałkowska 45a',
+          salary: 17000,
+          currency: 'pln',
+          latLng: [52.2464418, 21.1277591],
+          ref: 'ref1',
+          commute: {
+            travelTime: '0',
+            distance: '0',
+          },
+          active: true,
+        },
+        {
+          id: 2,
+          type: 'jobOffer',
+          company: 'Microsoft',
+          jobTitle: 'Frontend developer',
+          tech: ['javascript', 'react', 'webpack', 'node', 'css'],
+          description: 'We are looking for frontend dev',
+          city: 'Warsaw',
+          address: 'Marszałkowska 45a',
+          salary: 17000,
+          currency: 'pln',
+          latLng: [52.22977, 21.01178],
+          ref: 'ref2',
+          commute: {
+            travelTime: '0',
+            distance: '0',
+          },
+          active: true,
+        },
+        {
+          id: 3,
+          type: 'jobOffer',
+          company: 'Netflix',
+          jobTitle: 'Frontend developer',
+          tech: ['javascript', 'react', 'webpack', 'node', 'css'],
+          description: 'We are looking for frontend dev',
+          city: 'Warsaw',
+          address: 'Marszałkowska 45a',
+          salary: 18000,
+          currency: 'pln',
+          latLng: [52.23977, 21.02178],
+          ref: 'ref3',
+          commute: {
+            travelTime: '0',
+            distance: '0',
+          },
+          active: true,
+        },
+      ],
+      polyline: {
+        color: 'green',
+      },
+      testPolyline: [
+        [47.334852, -1.509485],
+        [47.342596, -1.328731],
+        [47.241487, -1.190568],
+        [47.234787, -1.358337],
+      ],
       travelTypes: {
         walking: 'walking',
         driving: 'driving',
         cycling: 'cycling',
       },
+      jobCoordsForRoute: [],
       travelType: 'driving',
+    }
+  },
+  mounted() {
+    if (!this.coordinates) {
+      this.getGeoLocalization()
     }
   },
   computed: {
@@ -69,11 +163,15 @@ export default {
       }
       return null
     },
-  },
-  mounted() {
-    if (!this.coordinates) {
-      this.getGeoLocalization()
-    }
+    jobOffersMaker() {
+      return this.markers.filter((m) => m.type === 'jobOffer')
+    },
+    polylineCoords() {
+      if (this.jobCoordsForRoute.length > 0) {
+        return [[this.userLatitude, this.userLongitude], this.jobCoordsForRoute]
+      }
+      return null
+    },
   },
   methods: {
     getGeoLocalization() {
@@ -85,129 +183,89 @@ export default {
     getGeoLocalSuccess(position) {
       this.userLatitude = position.coords.latitude
       this.userLongitude = position.coords.longitude
-      this.renderMapBox()
+      const markerUserLocation = this.createUserLocalizationMarker(
+        position.coords.latitude,
+        position.coords.longitude
+      )
+      this.markers.push(markerUserLocation)
+    },
+    createUserLocalizationMarker(lat, lng) {
+      return {
+        id: 9999,
+        type: 'userLocalization',
+        latLng: [lat, lng],
+        ref: 'userMarker',
+        active: true,
+      }
     },
     getGeoLocalError(error) {
       console.log(error)
     },
-    showRoute() {
-      this.getRoute(this.coordinates, [
-        this.userLongitude + 0.025,
-        this.userLatitude - 0.15,
-      ])
+    showToltip(tooltipRef, isActive) {
+      isActive
+        ? this.$refs[tooltipRef][0].mapObject.openPopup()
+        : this.$refs[tooltipRef][0].mapObject.closePopup()
     },
-    renderMapBox() {
-      this.mapGL = new mapboxGl.Map({
-        container: 'mapContainer',
-        style: 'mapbox://styles/mapbox/streets-v11',
-        accessToken: this.mapApiKey,
-        center: this.coordinates,
-        zoom: 3,
-        essential: true,
+    async calculateTravelTime(marker) {
+      const jobOfferLocalization = `${marker.latLng[1]},${marker.latLng[0]}`
+      const userLocalization = `${this.userLongitude},${this.userLatitude}`
+      this.jobCoordsForRoute = [marker.latLng[0], marker.latLng[1]]
+      const travelData = await fetch(
+        `http://router.project-osrm.org/route/v1/driving/${jobOfferLocalization};${userLocalization}?overview=false`
+      ).catch((error) => {
+        console.log(error)
       })
+      const data = await travelData.json()
+      const markerToUpdate = this.markers.find((m) => m.id === marker.id)
+      const markerCommuteData = data?.routes[0]
 
-      this.mapGL.flyTo({
-        center: this.coordinates,
-        zoom: 8,
-        essential: true,
-        speed: 0.4,
-      })
-      new mapboxGl.Marker()
-        .setLngLat([this.userLongitude, this.userLatitude])
-        .addTo(this.mapGL)
+      markerToUpdate.commute.travelTime = (
+        markerCommuteData.duration / 60
+      ).toFixed(0)
 
-      new mapboxGl.Marker()
-        .setLngLat([this.userLongitude + 0.025, this.userLatitude - 0.15])
-        .addTo(this.mapGL)
+      markerToUpdate.commute.distance = (
+        markerCommuteData.distance / 1000
+      ).toFixed(2)
     },
-    async getRoute(start, end) {
-      this.error = null
-      this.loading = true
-      const url =
-        'https://api.mapbox.com/directions/v5/mapbox/' +
-        this.travelType +
-        '/' +
-        start[0] +
-        ',' +
-        start[1] +
-        ';' +
-        end[0] +
-        ',' +
-        end[1] +
-        '?steps=true&geometries=geojson&access_token=' +
-        this.mapApiKey
-
-      const response = await fetch(url)
-      const data = await response.json()
-      this.loading = false
-      if (data.code !== 'Ok') {
-        this.routeData = null
-        this.error = data.code
-        return
+    activeCard(jobData, isActive) {
+      if (isActive) {
+        this.centerMap(jobData.latLng, 11)
       }
-      this.routeData = data.routes[0]
-      this.travel.duration = `${Math.floor(data.routes[0].duration / 60)} min`
-      this.travel.type = 'bike'
-      this.addLayerToMap()
+      this.toggleMarkerAnimation(jobData.ref, isActive)
     },
-    addLayerToMap() {
-      const route = this.routeData.geometry.coordinates
-      const geojson = {
-        type: 'Feature',
-        properties: {},
-        geometry: {
-          type: 'LineString',
-          coordinates: route,
-        },
-      }
-      if (this.mapGL.getSource('route')) {
-        this.mapGL.getSource('route').setData(geojson)
-      } else {
-        // otherwise, make a new request
-        this.mapGL.addLayer({
-          id: 'route',
-          type: 'line',
-          source: {
-            type: 'geojson',
-            data: {
-              type: 'Feature',
-              properties: {},
-              geometry: {
-                type: 'LineString',
-                coordinates: geojson,
-              },
-            },
-          },
-          layout: {
-            'line-join': 'round',
-            'line-cap': 'round',
-          },
-          paint: {
-            'line-color': '#3887be',
-            'line-width': 5,
-            'line-opacity': 0.75,
-          },
-        })
-      }
+    centerMap(canterCords, zoom) {
+      this.$refs.map.mapObject.flyTo(canterCords, zoom)
+    },
+    toggleMarkerAnimation(marker, isActive) {
+      const icon = this.$refs[marker][0].mapObject._icon
+      isActive
+        ? icon.classList.add('activeMarker')
+        : icon.classList.remove('activeMarker')
     },
   },
 }
 </script>
-<style lang="scss" scoped>
+<style lang="scss">
 .map-wrapper {
   height: 90%;
   position: relative;
 }
 
-.mapboxgl-map {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 50%;
+.map-container {
+  height: 80vh;
+  width: 50vw;
 }
 
-.job-position-card {
-  border: 1px solid darkcyan;
-  margin-bottom: 1rem;
+.cards-wrapper {
+  flex-direction: column;
+}
+
+.activeMarker {
+  animation: fade 0.6s infinite alternate;
+}
+@keyframes fade {
+  from {
+    opacity: 0.5;
+  }
 }
 </style>
