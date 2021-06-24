@@ -1,6 +1,7 @@
 <template>
   <v-row justify="center" align="center">
     <v-col class="d-flex cards-wrapper" cols="6" sm="12" md="6">
+      <button @click="toggleDarkMode">dark mode</button>
       <job-card
         v-for="card in jobOffersMaker"
         :key="card.id"
@@ -18,7 +19,7 @@
       <div class="map-wrapper map-container">
         <client-only>
           <l-map ref="map" :zoom="11" :center="[52.2464418, 21.1277591]">
-            <l-tile-layer :url="urlMapboxStyle"> </l-tile-layer>
+            <l-tile-layer :url="mapTileApi"> </l-tile-layer>
             <l-polyline
               v-if="polylineCoords"
               :lat-lngs="polylineCoords"
@@ -56,8 +57,10 @@ export default {
     return {
       mapApiKey:
         'pk.eyJ1IjoiYWxleG1hbHkiLCJhIjoiY2o1OGN5aXR0MHp1ODJ3cDN3cmI4a2dkbSJ9.uR1Bix3JXHGJkz1dxXt3NA',
-      urlMapboxStyle:
+      darkMapTile:
         'https://{s}.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}.png',
+      lightMapTile:
+        'https://{s}.basemaps.cartocdn.com/rastertiles/voyager_labels_under/{z}/{x}/{y}.png',
       urlMapboxStyle2:
         'https://api.mapbox.com/styles/v1/alexmaly/ckph4rwbn029g17p4b5pvvg3s/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoiYWxleG1hbHkiLCJhIjoiY2o1OGN5aXR0MHp1ODJ3cDN3cmI4a2dkbSJ9.uR1Bix3JXHGJkz1dxXt3NA',
       userLatitude: null,
@@ -167,6 +170,9 @@ export default {
       }
       return null
     },
+    mapTileApi() {
+      return this.$vuetify.theme.dark ? this.darkMapTile : this.lightMapTile
+    },
   },
   mounted() {
     if (!this.coordinates) {
@@ -174,6 +180,9 @@ export default {
     }
   },
   methods: {
+    toggleDarkMode() {
+      this.darkMode = !this.darkMode
+    },
     getGeoLocalization() {
       navigator.geolocation.getCurrentPosition(
         this.getGeoLocalSuccess,

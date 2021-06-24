@@ -65,6 +65,13 @@ export default {
     theme: {
       dark: true,
       themes: {
+        light: {
+          primary: colors.purple,
+          secondary: colors.grey.darken1,
+          accent: colors.shades.black,
+          error: colors.red.accent3,
+          background: colors.indigo.lighten5,
+        },
         dark: {
           primary: colors.blue.darken2,
           accent: colors.grey.darken3,
