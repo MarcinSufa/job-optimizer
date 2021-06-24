@@ -10,8 +10,10 @@
         <div>
           {{ jobData.description }}
           <br />
-          time: {{ jobData.commute.travelTime }} minutes<br />
-          distance {{ jobData.commute.distance }} km <br />type:
+          <p ref="timeCounter" class="timerCounter">
+            time: {{ displayTravelTime }} minutes
+          </p>
+          distance {{ displayTravelDistance }} km <br />type:
         </div>
         <div></div>
       </v-card-text>
@@ -22,19 +24,52 @@
           @click.prevent="$emit('showToltip', jobData.ref, jobData.active)"
           >show route</v-btn
         >
-        <v-btn @click.prevent="$emit('calculateOffer', jobData)">
+        <v-btn @click.prevent="calculateTravelTime(jobData)">
           calculate Offer
         </v-btn>
       </v-card-actions>
     </v-card>
   </v-hover>
 </template>
-
+const { gsap } = require("gsap/dist/gsap");
 <script>
 export default {
-  name: 'jobCard',
+  name: 'JobCard',
   props: {
     jobData: Object,
+    travelTime: String,
+    travelDistance: String,
+  },
+  data() {
+    return {
+      displayTravelTime: this.travelTime,
+      tweenTravelTime: this.travelTime,
+      displayTravelDistance: this.travelDistance,
+      tweenTravelDistance: this.travelDistance,
+    }
+  },
+  watch: {
+    travelTime() {
+      this.$gsap.to(this, {
+        tweenTravelTime: this.travelTime,
+        onUpdate: () => {
+          this.displayTravelTime = Math.ceil(this.tweenTravelTime)
+        },
+      })
+    },
+    travelDistance() {
+      this.$gsap.to(this, {
+        tweenTravelDistance: this.travelDistance,
+        onUpdate: () => {
+          this.displayTravelDistance = Math.ceil(this.tweenTravelDistance)
+        },
+      })
+    },
+  },
+  methods: {
+    calculateTravelTime(jobData) {
+      this.$emit('calculateOffer', jobData)
+    },
   },
 }
 </script>
@@ -44,7 +79,7 @@ export default {
   border: 1px solid darkcyan;
   margin-bottom: 1rem;
   &-active {
-    border: 2px deeppink solid;
+    border: 1px deeppink solid;
     transition: border 0.5s ease-in;
   }
 }

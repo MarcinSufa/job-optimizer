@@ -78,7 +78,18 @@ export default {
     },
   },
   gsap: {
-    /* module options */
+    extraPlugins: {
+      /**
+       * After activation, plugins are automatically
+       * registered and available globally
+       */
+      scrollTo: true,
+      scrollTrigger: true,
+      text: true,
+    },
+    extraEases: {
+      expoScaleEase: true,
+    },
   },
 
   // Build Configuration: https://go.nuxtjs.dev/config-build

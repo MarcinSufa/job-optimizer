@@ -5,6 +5,8 @@
         v-for="card in jobOffersMaker"
         :key="card.id"
         :jobData="card"
+        :travelTime="card.commute.travelTime"
+        :travelDistance="card.commute.distance"
         class="job-position-card"
         @showToltip="showToltip"
         @calculateOffer="calculateTravelTime"
@@ -71,7 +73,7 @@ export default {
       toggleRoute: false,
       markerTimeTravel: {},
       iconSize: [32, 32],
-      iconAnchor: [16, 0],
+      iconAnchor: [16, 16],
       markers: [
         {
           id: 1,
@@ -87,8 +89,8 @@ export default {
           latLng: [52.2464418, 21.1277591],
           ref: 'ref1',
           commute: {
-            travelTime: null,
-            distance: null,
+            travelTime: '0',
+            distance: '0',
           },
           active: true,
         },
@@ -106,8 +108,8 @@ export default {
           latLng: [52.22977, 21.01178],
           ref: 'ref2',
           commute: {
-            travelTime: null,
-            distance: null,
+            travelTime: '0',
+            distance: '0',
           },
           active: true,
         },
@@ -125,8 +127,8 @@ export default {
           latLng: [52.23977, 21.02178],
           ref: 'ref3',
           commute: {
-            travelTime: null,
-            distance: null,
+            travelTime: '0',
+            distance: '0',
           },
           active: true,
         },
