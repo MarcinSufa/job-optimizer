@@ -4,9 +4,9 @@
       <job-card
         v-for="card in jobOffersMaker"
         :key="card.id"
-        :jobData="card"
-        :travelTime="card.commute.travelTime"
-        :travelDistance="card.commute.distance"
+        :job-data="card"
+        :travel-time="card.commute.travelTime"
+        :travel-distance="card.commute.distance"
         class="job-position-card"
         @showToltip="showToltip"
         @calculateOffer="calculateTravelTime"
@@ -25,10 +25,10 @@
               :color="polyline.color"
             ></l-polyline>
             <l-marker
-              :ref="m.ref"
               v-for="m in markers"
+              :ref="m.ref"
               :key="m.id"
-              :latLng="m.latLng"
+              :lat-lng="m.latLng"
             >
               <l-icon
                 :icon-size="iconSize"
@@ -36,7 +36,7 @@
                 icon-url="icons/apple-original.svg"
               >
               </l-icon>
-              <marker-tooltip :markerInfo="m"></marker-tooltip> </l-marker
+              <marker-tooltip :marker-info="m"></marker-tooltip> </l-marker
           ></l-map>
         </client-only>
       </div>
@@ -151,11 +151,6 @@ export default {
       travelType: 'driving',
     }
   },
-  mounted() {
-    if (!this.coordinates) {
-      this.getGeoLocalization()
-    }
-  },
   computed: {
     coordinates() {
       if (this.userLatitude && this.userLongitude) {
@@ -172,6 +167,11 @@ export default {
       }
       return null
     },
+  },
+  mounted() {
+    if (!this.coordinates) {
+      this.getGeoLocalization()
+    }
   },
   methods: {
     getGeoLocalization() {
