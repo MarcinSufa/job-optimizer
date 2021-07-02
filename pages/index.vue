@@ -1,38 +1,39 @@
 <template>
   <v-row>
-    <v-col class="d-flex cards-wrapper" cols="6" sm="12" md="6">
+    <v-col class="d-flex cards-wrapper" cols="12" sm="12" md="6">
       <v-row class="job-radius-wrapper">
         <v-col cols="12" sm="2" md="2">
           <v-switch v-model="isJobRadiusRageActive"></v-switch>
         </v-col>
         <v-col cols="12" sm="10" md="10">
-          <v-transition appear>
-            <v-slider
-              v-if="isJobRadiusRageActive"
-              v-model="jobsRadiusRange"
-              class="job-radius-slider"
-              thumb-label="always"
-            ></v-slider>
-          </v-transition>
+          <v-slider
+            v-if="isJobRadiusRageActive"
+            v-model="jobsRadiusRange"
+            class="job-radius-slider"
+            thumb-label="always"
+            label="Km"
+            prepend-icon="mdi-radius"
+            inverse-label
+          ></v-slider>
         </v-col>
       </v-row>
-
       <v-expand-transition v-for="card in jobOffersMaker" :key="card.id" appear>
-        <job-card
-          v-show="isJobOfferActive(card.latLng)"
-          :job-data="card"
-          :travel-time="card.commute.travelTime"
-          :travel-distance="card.commute.distance"
-          class="job-position-card"
-          @showToltip="showToltip"
-          @calculateOffer="calculateTravelTime"
-          @activeCard="activeCard"
-          @centerToMarker="centerMap"
-        >
-        </job-card>
+        <div>
+          <job-card
+            v-show="isJobOfferActive(card.latLng)"
+            :job-data="card"
+            :travel-time="card.commute.travelTime"
+            :travel-distance="card.commute.distance"
+            class="job-position-card"
+            @showToltip="showToltip"
+            @calculateOffer="calculateTravelTime"
+            @activeCard="activeCard"
+            @centerToMarker="centerMap"
+          />
+        </div>
       </v-expand-transition>
     </v-col>
-    <v-col class="d-flex" cols="6" sm="12" md="6">
+    <v-col class="d-flex" cols="12" sm="12" md="6">
       <div class="map-wrapper map-container">
         <client-only>
           <l-map ref="map" :zoom="11" :center="[52.2464418, 21.1277591]">
@@ -43,7 +44,7 @@
               :color="polyline.color"
             ></l-polyline>
             <l-marker
-              v-for="m in markers"
+              v-for="m in jobOffersMaker"
               :ref="m.ref"
               :key="m.id"
               :lat-lng="m.latLng"
@@ -54,8 +55,24 @@
                 icon-url="icons/apple-original.svg"
               >
               </l-icon>
-              <marker-tooltip :marker-info="m"></marker-tooltip> </l-marker
-          ></l-map>
+              <marker-tooltip :marker-info="m"></marker-tooltip>
+            </l-marker>
+            <l-marker
+              v-if="userLocationLatLng"
+              ref="userLocationLatLng"
+              :lat-lng="userLocationLatLng"
+            >
+              <l-icon
+                :icon-size="iconSize"
+                :icon-anchor="iconAnchor"
+                icon-url="icons/apple-original.svg"
+              >
+              </l-icon>
+              <marker-tooltip
+                :marker-info="markerUserLocation"
+              ></marker-tooltip>
+            </l-marker>
+          </l-map>
         </client-only>
       </div>
     </v-col>
@@ -84,8 +101,10 @@ export default {
         userLatitude: null,
         userLongitude: null,
       },
+      markerUserLocation: null,
+      homeLocationIcon: '',
       isJobRadiusRageActive: false,
-      jobsRadiusRange: 0,
+      jobsRadiusRange: 50,
       mapGL: {},
       routeData: null,
       error: null,
@@ -176,14 +195,21 @@ export default {
     }
   },
   computed: {
-    coordinates() {
-      if (this.userLocation.userLatitude && this.userLocation.userLongitude) {
-        return [this.userLocation.userLongitude, this.userLocation.userLatitude]
+    userLocationLatLng() {
+      if (this.userLocation?.userLatitude && this.userLocation?.userLongitude) {
+        return [this.userLocation.userLatitude, this.userLocation.userLongitude]
       }
       return null
     },
     jobOffersMaker() {
-      return this.markers.filter((m) => m.type === 'jobOffer' && m.active)
+      if (this.isJobRadiusRageActive) {
+        return this.markers.filter(
+          (m) =>
+            m.type === 'jobOffer' &&
+            this.isInDistanceRadius(m.latLng, this.userLocationLatLng)
+        )
+      }
+      return this.markers
     },
     polylineCoords() {
       if (this.jobCoordsForRoute.length > 0) {
@@ -199,7 +225,7 @@ export default {
     },
   },
   mounted() {
-    if (!this.coordinates) {
+    if (!this.userLocationLatLng) {
       this.getGeoLocalization()
     }
   },
@@ -226,11 +252,10 @@ export default {
       this.userLocation.userLatitude = position.coords.latitude
       this.userLocation.userLongitude = position.coords.longitude
 
-      const markerUserLocation = this.createUserLocalizationMarker(
+      this.markerUserLocation = this.createUserLocalizationMarker(
         position.coords.latitude,
         position.coords.longitude
       )
-      this.markers.push(markerUserLocation)
     },
     createUserLocalizationMarker(lat, lng) {
       return {
@@ -250,7 +275,9 @@ export default {
         : this.$refs[tooltipRef][0].mapObject.closePopup()
     },
     async calculateTravelTime(marker) {
-      this.isInDistanceRadius(this.markers[0].latLng, this.markers[3].latLng)
+      if (this.isJobRadiusRageActive && this.userLocationLatLng) {
+        this.isInDistanceRadius(this.markers[0].latLng, this.userLocationLatLng)
+      }
       const jobOfferLocalization = `${marker.latLng[1]},${marker.latLng[0]}`
       const userLocalization = `${this.userLocation.userLongitude},${this.userLocation.userLatitude}`
       this.jobCoordsForRoute = [marker.latLng[0], marker.latLng[1]]
@@ -263,7 +290,6 @@ export default {
       const markerToUpdate = this.markers.find((m) => m.id === marker.id)
       const markerCommuteData = data?.routes[0]
 
-      console.log(this.$refs.map.mapObject)
       markerToUpdate.commute.travelTime = (
         markerCommuteData.duration / 60
       ).toFixed(0)
@@ -273,6 +299,9 @@ export default {
       ).toFixed(2)
     },
     isInDistanceRadius(markerCoords, userCoords) {
+      if (!this.$refs.map?.mapObject) {
+        return false
+      }
       const distance =
         this.$refs.map.mapObject.distance(markerCoords, userCoords).toFixed(0) /
         1000
@@ -291,10 +320,12 @@ export default {
       this.$refs.map.mapObject.flyTo(canterCords, zoom)
     },
     toggleMarkerAnimation(marker, isActive) {
-      const icon = this.$refs[marker][0].mapObject._icon
-      isActive
-        ? icon.classList.add('activeMarker')
-        : icon.classList.remove('activeMarker')
+      if (marker) {
+        const icon = this.$refs[marker][0].mapObject._icon
+        isActive
+          ? icon.classList.add('activeMarker')
+          : icon.classList.remove('activeMarker')
+      }
     },
   },
 }
@@ -313,6 +344,7 @@ export default {
 .map-wrapper {
   height: 90%;
   position: relative;
+  z-index: 2;
 }
 
 .map-container {
