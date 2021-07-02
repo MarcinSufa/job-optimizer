@@ -282,7 +282,7 @@ export default {
       const userLocalization = `${this.userLocation.userLongitude},${this.userLocation.userLatitude}`
       this.jobCoordsForRoute = [marker.latLng[0], marker.latLng[1]]
       const travelData = await fetch(
-        `http://router.project-osrm.org/route/v1/driving/${jobOfferLocalization};${userLocalization}?overview=false`
+        `https://router.project-osrm.org/route/v1/driving/${jobOfferLocalization};${userLocalization}?overview=false`
       ).catch((error) => {
         console.log(error)
       })
