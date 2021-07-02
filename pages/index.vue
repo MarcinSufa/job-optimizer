@@ -1,19 +1,36 @@
 <template>
-  <v-row justify="center" align="center">
+  <v-row>
     <v-col class="d-flex cards-wrapper" cols="6" sm="12" md="6">
-      <button @click="toggleDarkMode">dark mode</button>
-      <job-card
-        v-for="card in jobOffersMaker"
-        :key="card.id"
-        :job-data="card"
-        :travel-time="card.commute.travelTime"
-        :travel-distance="card.commute.distance"
-        class="job-position-card"
-        @showToltip="showToltip"
-        @calculateOffer="calculateTravelTime"
-        @activeCard="activeCard"
-      >
-      </job-card>
+      <v-row class="job-radius-wrapper">
+        <v-col cols="12" sm="2" md="2">
+          <v-switch v-model="isJobRadiusRageActive"></v-switch>
+        </v-col>
+        <v-col cols="12" sm="10" md="10">
+          <v-transition appear>
+            <v-slider
+              v-if="isJobRadiusRageActive"
+              v-model="jobsRadiusRange"
+              class="job-radius-slider"
+              thumb-label="always"
+            ></v-slider>
+          </v-transition>
+        </v-col>
+      </v-row>
+
+      <v-expand-transition v-for="card in jobOffersMaker" :key="card.id" appear>
+        <job-card
+          v-show="isJobOfferActive(card.latLng)"
+          :job-data="card"
+          :travel-time="card.commute.travelTime"
+          :travel-distance="card.commute.distance"
+          class="job-position-card"
+          @showToltip="showToltip"
+          @calculateOffer="calculateTravelTime"
+          @activeCard="activeCard"
+          @centerToMarker="centerMap"
+        >
+        </job-card>
+      </v-expand-transition>
     </v-col>
     <v-col class="d-flex" cols="6" sm="12" md="6">
       <div class="map-wrapper map-container">
@@ -63,8 +80,12 @@ export default {
         'https://{s}.basemaps.cartocdn.com/rastertiles/voyager_labels_under/{z}/{x}/{y}.png',
       urlMapboxStyle2:
         'https://api.mapbox.com/styles/v1/alexmaly/ckph4rwbn029g17p4b5pvvg3s/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoiYWxleG1hbHkiLCJhIjoiY2o1OGN5aXR0MHp1ODJ3cDN3cmI4a2dkbSJ9.uR1Bix3JXHGJkz1dxXt3NA',
-      userLatitude: null,
-      userLongitude: null,
+      userLocation: {
+        userLatitude: null,
+        userLongitude: null,
+      },
+      isJobRadiusRageActive: false,
+      jobsRadiusRange: 0,
       mapGL: {},
       routeData: null,
       error: null,
@@ -137,7 +158,7 @@ export default {
         },
       ],
       polyline: {
-        color: 'green',
+        color: 'darkcyan',
       },
       testPolyline: [
         [47.334852, -1.509485],
@@ -156,17 +177,20 @@ export default {
   },
   computed: {
     coordinates() {
-      if (this.userLatitude && this.userLongitude) {
-        return [this.userLongitude, this.userLatitude]
+      if (this.userLocation.userLatitude && this.userLocation.userLongitude) {
+        return [this.userLocation.userLongitude, this.userLocation.userLatitude]
       }
       return null
     },
     jobOffersMaker() {
-      return this.markers.filter((m) => m.type === 'jobOffer')
+      return this.markers.filter((m) => m.type === 'jobOffer' && m.active)
     },
     polylineCoords() {
       if (this.jobCoordsForRoute.length > 0) {
-        return [[this.userLatitude, this.userLongitude], this.jobCoordsForRoute]
+        return [
+          [this.userLocation.userLatitude, this.userLocation.userLongitude],
+          this.jobCoordsForRoute,
+        ]
       }
       return null
     },
@@ -180,8 +204,17 @@ export default {
     }
   },
   methods: {
-    toggleDarkMode() {
-      this.darkMode = !this.darkMode
+    isJobOfferActive(companyLocation) {
+      if (this.$refs.map !== undefined && this.$refs.map.mapObject) {
+        if (!this.isJobRadiusRageActive) {
+          return true
+        }
+        return this.isInDistanceRadius(companyLocation, [
+          this.userLocation.userLatitude,
+          this.userLocation.userLongitude,
+        ])
+      }
+      return false
     },
     getGeoLocalization() {
       navigator.geolocation.getCurrentPosition(
@@ -190,8 +223,9 @@ export default {
       )
     },
     getGeoLocalSuccess(position) {
-      this.userLatitude = position.coords.latitude
-      this.userLongitude = position.coords.longitude
+      this.userLocation.userLatitude = position.coords.latitude
+      this.userLocation.userLongitude = position.coords.longitude
+
       const markerUserLocation = this.createUserLocalizationMarker(
         position.coords.latitude,
         position.coords.longitude
@@ -216,8 +250,9 @@ export default {
         : this.$refs[tooltipRef][0].mapObject.closePopup()
     },
     async calculateTravelTime(marker) {
+      this.isInDistanceRadius(this.markers[0].latLng, this.markers[3].latLng)
       const jobOfferLocalization = `${marker.latLng[1]},${marker.latLng[0]}`
-      const userLocalization = `${this.userLongitude},${this.userLatitude}`
+      const userLocalization = `${this.userLocation.userLongitude},${this.userLocation.userLatitude}`
       this.jobCoordsForRoute = [marker.latLng[0], marker.latLng[1]]
       const travelData = await fetch(
         `http://router.project-osrm.org/route/v1/driving/${jobOfferLocalization};${userLocalization}?overview=false`
@@ -228,6 +263,7 @@ export default {
       const markerToUpdate = this.markers.find((m) => m.id === marker.id)
       const markerCommuteData = data?.routes[0]
 
+      console.log(this.$refs.map.mapObject)
       markerToUpdate.commute.travelTime = (
         markerCommuteData.duration / 60
       ).toFixed(0)
@@ -236,10 +272,19 @@ export default {
         markerCommuteData.distance / 1000
       ).toFixed(2)
     },
-    activeCard(jobData, isActive) {
-      if (isActive) {
-        this.centerMap(jobData.latLng, 11)
+    isInDistanceRadius(markerCoords, userCoords) {
+      const distance =
+        this.$refs.map.mapObject.distance(markerCoords, userCoords).toFixed(0) /
+        1000
+      if (distance <= this.jobsRadiusRange) {
+        return true
       }
+      return false
+    },
+    getDistance(from, to) {
+      return from.distanceTo(to).toFixed(0) / 1000
+    },
+    activeCard(jobData, isActive) {
       this.toggleMarkerAnimation(jobData.ref, isActive)
     },
     centerMap(canterCords, zoom) {
@@ -255,6 +300,16 @@ export default {
 }
 </script>
 <style lang="scss">
+.job-radius {
+  &-wrapper {
+    align-content: center;
+    align-items: center;
+    margin-top: 10px;
+  }
+  &-slider {
+    margin-top: 20px;
+  }
+}
 .map-wrapper {
   height: 90%;
   position: relative;
@@ -276,5 +331,10 @@ export default {
   from {
     opacity: 0.5;
   }
+}
+
+.leaflet-tile-container img {
+  width: 256.5px !important;
+  height: 256.5px !important;
 }
 </style>
