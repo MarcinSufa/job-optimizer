@@ -16,10 +16,10 @@
 
 <script>
 export default {
+  name: 'MarkerTooltip',
   props: {
     markerInfo: Object,
   },
-  name: 'markerTooltip',
   methods: {
     goToOfferPage(e) {
       console.log(e)

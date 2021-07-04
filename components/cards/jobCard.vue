@@ -5,6 +5,22 @@
       @mouseover="$emit('activeCard', jobData, true)"
       @mouseleave="$emit('activeCard', jobData, false)"
     >
+      <v-fab-transition>
+        <v-btn
+          class="map-center-button"
+          color="primary"
+          absolute
+          depressed
+          elevation="2"
+          fab
+          icon
+          rounded
+          x-small
+          @click="$emit('centerToMarker', jobData.latLng)"
+        >
+          <v-icon>mdi-map-marker-radius</v-icon>
+        </v-btn>
+      </v-fab-transition>
       <v-card-title class="headline"> {{ jobData.jobTitle }} </v-card-title>
       <v-card-text>
         <div>
@@ -75,6 +91,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.map-center-button {
+  top: 0.5rem;
+  right: 0.5rem;
+}
 .job-position-card {
   border: 1px solid darkcyan;
   margin-bottom: 1rem;
