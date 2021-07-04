@@ -1,22 +1,10 @@
 <template>
   <v-row>
     <v-col class="d-flex cards-wrapper" cols="12" sm="12" md="6">
-      <v-row class="job-radius-wrapper">
-        <v-col cols="12" sm="2" md="2">
-          <v-switch v-model="isJobRadiusRageActive"></v-switch>
-        </v-col>
-        <v-col cols="12" sm="10" md="10">
-          <v-slider
-            v-if="isJobRadiusRageActive"
-            v-model="jobsRadiusRange"
-            class="job-radius-slider"
-            thumb-label="always"
-            label="Km"
-            prepend-icon="mdi-radius"
-            inverse-label
-          ></v-slider>
-        </v-col>
-      </v-row>
+      <slider
+        @changeIsJobRadiusRageActive="changeIsJobRadiusRageActive"
+        @changeJobsRadiusRange="changeJobsRadiusRange"
+      ></slider>
       <v-expand-transition v-for="card in jobOffersMaker" :key="card.id" appear>
         <div>
           <job-card
@@ -82,10 +70,12 @@
 <script>
 import jobCard from '@/components/cards/jobCard'
 import markerTooltip from '@/components/map/markers/markerTooltip'
+import slider from '@/components/slider/slider'
 export default {
   components: {
     jobCard,
     markerTooltip,
+    slider,
   },
   data() {
     return {
@@ -230,6 +220,12 @@ export default {
     }
   },
   methods: {
+    changeIsJobRadiusRageActive(isActive) {
+      this.isJobRadiusRageActive = isActive
+    },
+    changeJobsRadiusRange(rage) {
+      this.jobsRadiusRange = rage
+    },
     isJobOfferActive(companyLocation) {
       if (this.$refs.map !== undefined && this.$refs.map.mapObject) {
         if (!this.isJobRadiusRageActive) {
@@ -305,10 +301,7 @@ export default {
       const distance =
         this.$refs.map.mapObject.distance(markerCoords, userCoords).toFixed(0) /
         1000
-      if (distance <= this.jobsRadiusRange) {
-        return true
-      }
-      return false
+      return distance <= this.jobsRadiusRange
     },
     getDistance(from, to) {
       return from.distanceTo(to).toFixed(0) / 1000
