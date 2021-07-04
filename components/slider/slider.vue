@@ -33,4 +33,16 @@ export default {
 }
 </script>
 
-<style scoped></style>
+<style scoped lang="scss">
+.job-radius {
+  &-wrapper {
+    flex: none;
+    align-content: center;
+    align-items: center;
+    margin-top: 10px;
+  }
+  &-slider {
+    margin-top: 20px;
+  }
+}
+</style>

@@ -8,7 +8,7 @@
       </div>
       <div v-else>
         <p>Your localization</p>
-        <v-btn>change localization</v-btn>
+        <v-btn @click="changeLocation">change localization</v-btn>
       </div>
     </slot>
   </l-popup>
@@ -23,6 +23,9 @@ export default {
   methods: {
     goToOfferPage(e) {
       console.log(e)
+    },
+    changeLocation() {
+      this.$emit('initChageLocation')
     },
   },
 }

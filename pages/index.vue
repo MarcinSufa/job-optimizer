@@ -1,10 +1,37 @@
 <template>
   <v-row>
-    <v-col class="d-flex cards-wrapper" cols="12" sm="12" md="6">
-      <slider
-        @changeIsJobRadiusRageActive="changeIsJobRadiusRageActive"
-        @changeJobsRadiusRange="changeJobsRadiusRange"
-      ></slider>
+    <v-col
+      align="start"
+      justify="start"
+      class="d-flex cards-wrapper"
+      cols="12"
+      sm="12"
+      md="6"
+    >
+      <v-dialog v-model="isUserLocationDialogOpen" max-width="500">
+        <v-card>
+          <v-card-title>Localization</v-card-title>
+          <v-card-subtitle>Write your address</v-card-subtitle>
+          <v-card-text>
+            <v-text-field
+              label="address"
+              prepend-inner-icon="mdi-map-marker"
+              v-model="userAddressInput"
+            ></v-text-field
+          ></v-card-text>
+          <v-card-actions>
+            <v-col class="text-right">
+              <v-btn class="primary" @click="userAddressChange">submit</v-btn>
+            </v-col>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+      <v-card class="pa-3 mb-3">
+        <slider
+          @changeIsJobRadiusRageActive="changeIsJobRadiusRageActive"
+          @changeJobsRadiusRange="changeJobsRadiusRange"
+        />
+      </v-card>
       <v-expand-transition v-for="card in jobOffersMaker" :key="card.id" appear>
         <div>
           <job-card
@@ -58,6 +85,7 @@
               </l-icon>
               <marker-tooltip
                 :marker-info="markerUserLocation"
+                @initChageLocation="manuallyChangeUserLocation"
               ></marker-tooltip>
             </l-marker>
           </l-map>
@@ -91,6 +119,8 @@ export default {
         userLatitude: null,
         userLongitude: null,
       },
+      userAddressInput: '',
+      isUserLocationDialogOpen: false,
       markerUserLocation: null,
       homeLocationIcon: '',
       isJobRadiusRageActive: false,
@@ -185,6 +215,11 @@ export default {
     }
   },
   computed: {
+    userAddressInputFomatted() {
+      return this.userAddressInput
+        ? this.userAddressInput.replace(/ /g, '+')
+        : ''
+    },
     userLocationLatLng() {
       if (this.userLocation?.userLatitude && this.userLocation?.userLongitude) {
         return [this.userLocation.userLatitude, this.userLocation.userLongitude]
@@ -220,6 +255,9 @@ export default {
     }
   },
   methods: {
+    manuallyChangeUserLocation() {
+      this.isUserLocationDialogOpen = true
+    },
     changeIsJobRadiusRageActive(isActive) {
       this.isJobRadiusRageActive = isActive
     },
@@ -320,20 +358,27 @@ export default {
           : icon.classList.remove('activeMarker')
       }
     },
+    async userAddressChange() {
+      if (this.userAddressInputFomatted) {
+        const userAddressGeoLocal = await fetch(
+          `https://nominatim.openstreetmap.org/search?q=${this.userAddressInputFomatted}&format=json&polygon=1&addressdetails=1`
+        ).catch((error) => {
+          return console.log(error)
+        })
+        const result = await userAddressGeoLocal.json()
+        const newUserAddress = result[0] ? [result[0].lat, result[0].lon] : null
+        if (newUserAddress) {
+          this.userLocation.userLatitude = newUserAddress[0]
+          this.userLocation.userLongitude = newUserAddress[1]
+        }
+        this.userAddressInput = ''
+        this.isUserLocationDialogOpen = false
+      }
+    },
   },
 }
 </script>
 <style lang="scss">
-.job-radius {
-  &-wrapper {
-    align-content: center;
-    align-items: center;
-    margin-top: 10px;
-  }
-  &-slider {
-    margin-top: 20px;
-  }
-}
 .map-wrapper {
   height: 90%;
   position: relative;
