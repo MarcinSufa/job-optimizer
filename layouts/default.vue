@@ -35,11 +35,12 @@
       <v-toolbar-title v-text="title" />
 
       <v-spacer />
-      <v-switch
+      <v-checkbox
         v-model="$vuetify.theme.dark"
         hide-details
-        label="Light / Dark"
-      ></v-switch>
+        off-icon="mdi-theme-light-dark"
+        on-icon="mdi-theme-light-dark"
+      ></v-checkbox>
     </v-app-bar>
     <v-main>
       <v-container fluid fill-height>
