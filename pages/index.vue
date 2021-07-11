@@ -3,7 +3,7 @@
     <v-col
       align="start"
       justify="start"
-      class="d-flex cards-wrapper"
+      class="d-flex cards-wrapper pt-0"
       cols="12"
       sm="12"
       md="6"
@@ -32,23 +32,29 @@
           @changeJobsRadiusRange="changeJobsRadiusRange"
         />
       </v-card>
-      <v-expand-transition v-for="card in jobOffersMaker" :key="card.id" appear>
-        <div>
-          <job-card
-            v-show="isJobOfferActive(card.latLng)"
-            :job-data="card"
-            :travel-time="card.commute.travelTime"
-            :travel-distance="card.commute.distance"
-            class="job-position-card"
-            @showToltip="showToltip"
-            @calculateOffer="calculateTravelTime"
-            @activeCard="activeCard"
-            @centerToMarker="centerMap"
-          />
-        </div>
-      </v-expand-transition>
+      <div class="cards-wrapper-inner pt-0">
+        <v-expand-transition
+          v-for="card in jobOffersMaker"
+          :key="card.id"
+          appear
+        >
+          <div>
+            <job-card
+              v-show="isJobOfferActive(card.latLng)"
+              :job-data="card"
+              :travel-time="card.commute.travelTime"
+              :travel-distance="card.commute.distance"
+              class="job-position-card"
+              @showToltip="showToltip"
+              @calculateOffer="calculateTravelTime"
+              @activeCard="activeCard"
+              @centerToMarker="centerMap"
+            />
+          </div>
+        </v-expand-transition>
+      </div>
     </v-col>
-    <v-col class="d-flex" cols="12" sm="12" md="6">
+    <v-col class="d-flex pt-0" cols="12" sm="12" md="6">
       <div class="map-wrapper map-container">
         <client-only>
           <l-map ref="map" :zoom="11" :center="[52.2464418, 21.1277591]">
@@ -88,6 +94,13 @@
                 @initChageLocation="manuallyChangeUserLocation"
               ></marker-tooltip>
             </l-marker>
+            <l-circle
+              className="map-circle-job-range"
+              v-if="userLocationLatLng && isJobRadiusRageActive"
+              :lat-lng="userLocationLatLng"
+              :radius="jobsRadiusRange * 1000"
+              :color="polyline.color"
+            />
           </l-map>
         </client-only>
       </div>
@@ -99,6 +112,7 @@
 import jobCard from '@/components/cards/jobCard'
 import markerTooltip from '@/components/map/markers/markerTooltip'
 import slider from '@/components/slider/slider'
+import jobOffers from '@/services/jobOffers'
 export default {
   components: {
     jobCard,
@@ -137,65 +151,7 @@ export default {
       markerTimeTravel: {},
       iconSize: [32, 32],
       iconAnchor: [16, 16],
-      markers: [
-        {
-          id: 1,
-          type: 'jobOffer',
-          company: 'Aple',
-          jobTitle: 'Frontend developer',
-          tech: ['javascript', 'react', 'webpack', 'node', 'css'],
-          description: 'We are looking for frontend dev',
-          city: 'Warsaw',
-          address: 'Marszałkowska 45a',
-          salary: 17000,
-          currency: 'pln',
-          latLng: [52.2464418, 21.1277591],
-          ref: 'ref1',
-          commute: {
-            travelTime: '0',
-            distance: '0',
-          },
-          active: true,
-        },
-        {
-          id: 2,
-          type: 'jobOffer',
-          company: 'Microsoft',
-          jobTitle: 'Frontend developer',
-          tech: ['javascript', 'react', 'webpack', 'node', 'css'],
-          description: 'We are looking for frontend dev',
-          city: 'Warsaw',
-          address: 'Marszałkowska 45a',
-          salary: 17000,
-          currency: 'pln',
-          latLng: [52.22977, 21.01178],
-          ref: 'ref2',
-          commute: {
-            travelTime: '0',
-            distance: '0',
-          },
-          active: true,
-        },
-        {
-          id: 3,
-          type: 'jobOffer',
-          company: 'Netflix',
-          jobTitle: 'Frontend developer',
-          tech: ['javascript', 'react', 'webpack', 'node', 'css'],
-          description: 'We are looking for frontend dev',
-          city: 'Warsaw',
-          address: 'Marszałkowska 45a',
-          salary: 18000,
-          currency: 'pln',
-          latLng: [52.23977, 21.02178],
-          ref: 'ref3',
-          commute: {
-            travelTime: '0',
-            distance: '0',
-          },
-          active: true,
-        },
-      ],
+      markers: jobOffers,
       polyline: {
         color: 'darkcyan',
       },
@@ -392,6 +348,28 @@ export default {
 
 .cards-wrapper {
   flex-direction: column;
+  &-inner {
+    height: 60vh;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    padding-right: 15px;
+
+    &::-webkit-scrollbar {
+      width: 12px;
+      background-color: #f5f5f5;
+      border-radius: 10px;
+    }
+    &::-webkit-scrollbar-track {
+      -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+      border-radius: 10px;
+      background-color: #f5f5f5;
+    }
+    &::-webkit-scrollbar-thumb {
+      border-radius: 10px;
+      -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+      background-color: #2196f3;
+    }
+  }
 }
 
 .activeMarker {
@@ -406,5 +384,14 @@ export default {
 .leaflet-tile-container img {
   width: 256.5px !important;
   height: 256.5px !important;
+}
+
+body::-webkit-scrollbar {
+  width: 1em;
+}
+
+.map-circle-job-range {
+  transition: all 0.3s ease-out;
+  stroke-width: 2;
 }
 </style>

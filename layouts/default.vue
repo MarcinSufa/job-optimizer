@@ -43,7 +43,7 @@
       ></v-checkbox>
     </v-app-bar>
     <v-main>
-      <v-container fluid fill-height>
+      <v-container fluid fill-height pt-0>
         <nuxt />
       </v-container>
     </v-main>
@@ -80,3 +80,11 @@ export default {
   },
 }
 </script>
+<style lang="scss">
+@media (min-width: 1056px) {
+  html,
+  body {
+    overflow-y: hidden;
+  }
+}
+</style>

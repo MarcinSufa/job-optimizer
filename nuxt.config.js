@@ -15,15 +15,14 @@ export default {
     ],
     link: [
       { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
-      {
-        href: 'https://api.tiles.mapbox.com/mapbox-gl-js/v0.53.0/mapbox-gl.css',
-        rel: 'stylesheet',
-      },
-      {
-        href: 'https://cdn.jsdelivr.net/npm/vue-mapbox@latest/dist/vue-mapbox.css',
-        rel: 'stylesheet',
-      },
-
+      // {
+      //   href: 'https://api.tiles.mapbox.com/mapbox-gl-js/v0.53.0/mapbox-gl.css',
+      //   rel: 'stylesheet',
+      // },
+      // {
+      //   href: 'https://cdn.jsdelivr.net/npm/vue-mapbox@latest/dist/vue-mapbox.css',
+      //   rel: 'stylesheet',
+      // },
     ],
   },
 
@@ -66,7 +65,9 @@ export default {
 
   // Vuetify module configuration: https://go.nuxtjs.dev/config-vuetify
   vuetify: {
+    treeShake: true,
     customVariables: ['~/assets/variables.scss'],
+    customProperties: true,
     theme: {
       dark: true,
       themes: {
