@@ -84,7 +84,7 @@ export default {
 @media (min-width: 1056px) {
   html,
   body {
-    overflow-y: hidden;
+    overflow-y: hidden !important;
   }
 }
 </style>
