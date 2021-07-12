@@ -28,7 +28,7 @@ export default {
   data() {
     return {
       isJobRadiusRageActive: false,
-      jobsRadiusRange: 50,
+      jobsRadiusRange: 25,
     }
   },
 }

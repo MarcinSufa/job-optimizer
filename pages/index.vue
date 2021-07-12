@@ -95,6 +95,7 @@
               ></marker-tooltip>
             </l-marker>
             <l-circle
+              ref="circleRadius"
               className="map-circle-job-range"
               v-if="userLocationLatLng && isJobRadiusRageActive"
               :lat-lng="userLocationLatLng"
@@ -138,7 +139,7 @@ export default {
       markerUserLocation: null,
       homeLocationIcon: '',
       isJobRadiusRageActive: false,
-      jobsRadiusRange: 50,
+      jobsRadiusRange: 25,
       mapGL: {},
       routeData: null,
       error: null,
@@ -216,6 +217,18 @@ export default {
     },
     changeIsJobRadiusRageActive(isActive) {
       this.isJobRadiusRageActive = isActive
+      if (this.userLocationLatLng) {
+        this.fitMapToBounds('circleRadius')
+      }
+    },
+    fitMapToBounds(refObject) {
+      this.$nextTick(() => {
+        if (this.$refs[refObject]) {
+          this.$refs.map.mapObject.fitBounds(
+            this.$refs[refObject].mapObject.getBounds()
+          )
+        }
+      })
     },
     changeJobsRadiusRange(rage) {
       this.jobsRadiusRange = rage
