@@ -14,9 +14,9 @@
           <v-card-subtitle>Write your address</v-card-subtitle>
           <v-card-text>
             <v-text-field
+              v-model="userAddressInput"
               label="address"
               prepend-inner-icon="mdi-map-marker"
-              v-model="userAddressInput"
             ></v-text-field
           ></v-card-text>
           <v-card-actions>
@@ -391,7 +391,6 @@ body::-webkit-scrollbar {
 }
 
 .map-circle-job-range {
-  transition: all 0.3s ease-out;
   stroke-width: 2;
 }
 </style>

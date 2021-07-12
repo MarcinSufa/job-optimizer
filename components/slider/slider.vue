@@ -15,6 +15,7 @@
         label="Km"
         prepend-icon="mdi-radius"
         inverse-label
+        :step="0.01"
         @input="$emit('changeJobsRadiusRange', jobsRadiusRange)"
       ></v-slider>
     </v-col>
