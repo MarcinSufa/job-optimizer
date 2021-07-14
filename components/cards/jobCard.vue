@@ -5,45 +5,70 @@
       @mouseover="$emit('activeCard', jobData, true)"
       @mouseleave="$emit('activeCard', jobData, false)"
     >
-      <v-fab-transition>
-        <v-btn
-          class="map-center-button"
-          color="primary"
-          absolute
-          depressed
-          elevation="2"
-          fab
-          icon
-          rounded
-          x-small
-          @click="$emit('centerToMarker', jobData.latLng)"
-        >
-          <v-icon>mdi-map-marker-radius</v-icon>
-        </v-btn>
-      </v-fab-transition>
-      <v-card-title class="headline"> {{ jobData.jobTitle }} </v-card-title>
-      <v-card-text>
+      <div class="job-position-card-inner">
         <div>
-          {{ jobData.description }}
-          <br />
-          <p ref="timeCounter" class="timerCounter">
-            time: {{ displayTravelTime }} minutes
-          </p>
-          distance {{ displayTravelDistance }} km <br />type:
+          <v-img
+            contain
+            max-height="64"
+            max-width="64"
+            :src="jobData.companyLogo"
+          ></v-img>
         </div>
-        <div></div>
-      </v-card-text>
-      <v-card-actions>
-        <v-spacer />
-        <v-btn
-          color="primary"
-          @click.prevent="$emit('showToltip', jobData.ref, jobData.active)"
-          >show route</v-btn
-        >
-        <v-btn @click.prevent="calculateTravelTime(jobData)">
-          calculate Offer
-        </v-btn>
-      </v-card-actions>
+        <div class="job-position-card-inner-content">
+          <div>
+            <v-fab-transition>
+              <v-btn
+                class="map-center-button"
+                color="primary"
+                absolute
+                depressed
+                elevation="2"
+                fab
+                icon
+                rounded
+                x-small
+                @click="$emit('centerToMarker', jobData.latLng)"
+              >
+                <v-icon>mdi-map-marker-radius</v-icon>
+              </v-btn>
+            </v-fab-transition>
+
+            <v-card-title class="text-subtitle-1 pt-2 pb-2 font-weight-medium">
+              {{ jobData.jobTitle }}
+            </v-card-title>
+            <div class="job-position-card-salary text-subtitle-2 ml-4">
+              {{ jobData.salary.min | formatShortThousandNumber }} -
+              {{ jobData.salary.max | formatShortThousandNumber }}
+            </div>
+            <v-card-text>
+              <div>
+                {{ jobData.description }}
+                <br />
+                <p ref="timeCounter" class="timerCounter">
+                  time: {{ displayTravelTime }} minutes
+                </p>
+                distance {{ displayTravelDistance }} km <br />type:
+              </div>
+              <div></div>
+            </v-card-text>
+          </div>
+          <div>
+            <v-card-actions>
+              <v-spacer />
+              <v-btn
+                color="primary"
+                @click.prevent="
+                  $emit('showToltip', jobData.ref, jobData.active)
+                "
+                >show route</v-btn
+              >
+              <v-btn @click.prevent="calculateTravelTime(jobData)">
+                calculate Offer
+              </v-btn>
+            </v-card-actions>
+          </div>
+        </div>
+      </div>
     </v-card>
   </v-hover>
 </template>
@@ -51,6 +76,11 @@ const { gsap } = require("gsap/dist/gsap");
 <script>
 export default {
   name: 'JobCard',
+  filters: {
+    formatShortThousandNumber(number) {
+      return `${number / 1000}k`
+    },
+  },
   props: {
     jobData: Object,
     travelTime: String,
@@ -91,6 +121,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.headline {
+  font-size: 1rem;
+  font-weight: 500;
+}
 .map-center-button {
   top: 0.5rem;
   right: 0.5rem;
@@ -98,6 +132,14 @@ export default {
 .job-position-card {
   border: 1px solid darkcyan;
   margin-bottom: 1rem;
+  &-salary {
+    color: #41b883;
+  }
+  &-inner {
+    display: flex;
+    &-content {
+    }
+  }
   &-active {
     border: 1px deeppink solid;
     transition: border 0.5s ease-in;
