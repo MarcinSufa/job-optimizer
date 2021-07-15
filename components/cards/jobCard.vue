@@ -49,7 +49,10 @@
                 </p>
                 distance {{ displayTravelDistance }} km <br />type:
               </div>
-              <div></div>
+              <div v-if="jobData.scoring.enabled">
+                Real Salary:
+                {{ jobData.scoring.salary.real | formatShortThousandNumber }}
+              </div>
             </v-card-text>
           </div>
           <div>

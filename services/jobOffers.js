@@ -26,6 +26,15 @@ export default [
     },
     remote: 0,
     active: true,
+    scoring: {
+      enabled: false,
+      salary: {
+        salaryPerHour: 0,
+        commuteTime: 0,
+        holidays: 0,
+        real: 0,
+      },
+    },
   },
   {
     id: 2,
@@ -54,6 +63,15 @@ export default [
     },
     remote: 100,
     active: true,
+    scoring: {
+      enabled: false,
+      salary: {
+        salaryPerHour: 0,
+        commuteTime: 0,
+        holidays: 0,
+        real: 0,
+      },
+    },
   },
   {
     id: 3,
@@ -82,5 +100,14 @@ export default [
     },
     remote: 50,
     active: true,
+    scoring: {
+      enabled: false,
+      salary: {
+        salaryPerHour: 0,
+        commuteTime: 0,
+        holidays: 0,
+        real: 0,
+      },
+    },
   },
 ]
