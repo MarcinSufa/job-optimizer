@@ -39,6 +39,8 @@
             <div class="job-position-card-salary text-subtitle-2 ml-4">
               {{ jobData.salary.min | formatShortThousandNumber }} -
               {{ jobData.salary.max | formatShortThousandNumber }}
+              real salary
+              {{ jobData.scoring.salary.real | formatShortThousandNumber }}
             </div>
             <v-card-text>
               <div>

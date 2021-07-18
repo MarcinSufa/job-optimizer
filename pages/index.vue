@@ -114,6 +114,7 @@ import jobCard from '@/components/cards/jobCard'
 import markerTooltip from '@/components/map/markers/markerTooltip'
 import slider from '@/components/slider/slider'
 import jobOffers from '@/services/jobOffers'
+import salaryScoring from '@/services/scoring/salaryScoring'
 export default {
   components: {
     jobCard,
@@ -301,17 +302,19 @@ export default {
         markerCommuteData.distance / 1000
       ).toFixed(2)
 
-      const averageSalary = this.calculateSalaryForScoring(marker.salary)
-      const moneyLostOnCommute = this.calculateLostMoneyOnCommute(
+      const averageSalary = salaryScoring.calculateSalaryForScoring(
+        marker.salary
+      )
+      const moneyLostOnCommute = salaryScoring.calculateLostMoneyOnCommute(
         averageSalary,
         marker.commute.travelTime
       )
 
-      const moneyLostOnHolidays = this.calculateLostMoneyOnHolidays(
+      const moneyLostOnHolidays = salaryScoring.calculateLostMoneyOnHolidays(
         averageSalary,
         marker.holidays
       )
-      const realSalary = this.calculateRealYearlySalary(
+      const realSalary = salaryScoring.calculateRealYearlySalary(
         averageSalary,
         moneyLostOnCommute,
         moneyLostOnHolidays
@@ -319,33 +322,7 @@ export default {
       markerToUpdate.scoring.salary.real = realSalary
       markerToUpdate.scoring.enabled = true
     },
-    calculateRealYearlySalary(
-      averageSalary,
-      moneyLostOnCommute,
-      moneyLostOnHolidays
-    ) {
-      return (
-        (averageSalary * 12 - moneyLostOnCommute - moneyLostOnHolidays) /
-        12
-      ).toFixed()
-    },
-    calculateLostMoneyOnHolidays(averageSalary, holidayPerYear) {
-      const moneyLostPerDay = (averageSalary / 21).toFixed()
-      let remainingHolidayPerYear = 26 - holidayPerYear
-      if (remainingHolidayPerYear < 0) {
-        remainingHolidayPerYear = 0
-      }
-      const moneyLostOnHolidays = remainingHolidayPerYear * moneyLostPerDay
-      return moneyLostOnHolidays
-    },
-    calculateSalaryForScoring(salary, number = (salary.min + salary.max) / 2) {
-      return number
-    },
-    calculateLostMoneyOnCommute(averageSalary, commuteTime) {
-      const dailyCommuteTime = commuteTime * 2
-      const yearlyCommuteTime = (dailyCommuteTime / 60).toFixed() * 21 * 12
-      return yearlyCommuteTime.toFixed() * (averageSalary / 21 / 8).toFixed()
-    },
+
     isInDistanceRadius(markerCoords, userCoords) {
       if (!this.$refs.map?.mapObject) {
         return false
