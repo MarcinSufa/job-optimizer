@@ -95,9 +95,9 @@
               ></marker-tooltip>
             </l-marker>
             <l-circle
-              ref="circleRadius"
-              className="map-circle-job-range"
               v-if="userLocationLatLng && isJobRadiusRageActive"
+              ref="circleRadius"
+              class-name="map-circle-job-range"
               :lat-lng="userLocationLatLng"
               :radius="jobsRadiusRange * 1000"
               :color="polyline.color"
@@ -173,7 +173,7 @@ export default {
     }
   },
   computed: {
-    userAddressInputFomatted() {
+    userAddressInputFormatted() {
       return this.userAddressInput
         ? this.userAddressInput.replace(/ /g, '+')
         : ''
@@ -314,12 +314,13 @@ export default {
         averageSalary,
         marker.holidays
       )
-      const realSalary = salaryScoring.calculateRealYearlySalary(
-        averageSalary,
-        moneyLostOnCommute,
-        moneyLostOnHolidays
-      )
-      markerToUpdate.scoring.salary.real = realSalary
+
+      markerToUpdate.scoring.salary.real =
+        salaryScoring.calculateRealYearlySalary(
+          averageSalary,
+          moneyLostOnCommute,
+          moneyLostOnHolidays
+        )
       markerToUpdate.scoring.enabled = true
     },
 
@@ -350,9 +351,9 @@ export default {
       }
     },
     async userAddressChange() {
-      if (this.userAddressInputFomatted) {
+      if (this.userAddressInputFormatted) {
         const userAddressGeoLocal = await fetch(
-          `https://nominatim.openstreetmap.org/search?q=${this.userAddressInputFomatted}&format=json&polygon=1&addressdetails=1`
+          `https://nominatim.openstreetmap.org/search?q=${this.userAddressInputFormatted}&format=json&polygon=1&addressdetails=1`
         ).catch((error) => {
           return console.log(error)
         })

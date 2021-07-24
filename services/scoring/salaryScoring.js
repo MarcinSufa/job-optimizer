@@ -1,23 +1,46 @@
 export default {
+  minutesInHour: 60,
+  daysInMonth: 21,
+  monthsInYear: 12,
+  paidHolidaysInYear: 26,
+  hoursPerWorkingDay: 8,
+
+  yearlyCommuteTime(commuteTime) {
+    return (
+      ((commuteTime * 2) / this.minutesInHour).toFixed() *
+      this.daysInMonth *
+      this.monthsInYear
+    )
+  },
+  hourlySalary(salary) {
+    return (salary / this.daysInMonth / this.hoursPerWorkingDay).toFixed()
+  },
+  dailySalary(salary) {
+    return (salary / this.daysInMonth).toFixed()
+  },
+  yearlySalary(salary) {
+    return salary * this.monthsInYear
+  },
+
   calculateRealYearlySalary(
     averageSalary,
     moneyLostOnCommute,
     moneyLostOnHolidays
   ) {
     return (
-      (averageSalary * 12 - moneyLostOnCommute - moneyLostOnHolidays) /
+      (this.yearlySalary(averageSalary) -
+        moneyLostOnCommute -
+        moneyLostOnHolidays) /
       12
     ).toFixed()
   },
 
   calculateLostMoneyOnHolidays(averageSalary, holidayPerYear) {
-    const moneyLostPerDay = (averageSalary / 21).toFixed()
-    let remainingHolidayPerYear = 26 - holidayPerYear
+    let remainingHolidayPerYear = this.paidHolidaysInYear - holidayPerYear
     if (remainingHolidayPerYear < 0) {
       remainingHolidayPerYear = 0
     }
-    const moneyLostOnHolidays = remainingHolidayPerYear * moneyLostPerDay
-    return moneyLostOnHolidays
+    return remainingHolidayPerYear * this.dailySalary(averageSalary)
   },
 
   calculateSalaryForScoring(salary, number = (salary.min + salary.max) / 2) {
@@ -25,8 +48,8 @@ export default {
   },
 
   calculateLostMoneyOnCommute(averageSalary, commuteTime) {
-    const dailyCommuteTime = commuteTime * 2
-    const yearlyCommuteTime = (dailyCommuteTime / 60).toFixed() * 21 * 12
-    return yearlyCommuteTime.toFixed() * (averageSalary / 21 / 8).toFixed()
+    return (
+      this.yearlyCommuteTime(commuteTime) * this.hourlySalary(averageSalary)
+    )
   },
 }
