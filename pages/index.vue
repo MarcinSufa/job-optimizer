@@ -155,7 +155,7 @@ export default {
       iconAnchor: [16, 16],
       markers: jobOffers,
       polyline: {
-        color: 'darkcyan',
+        color: 'var(--v-primary-base)',
       },
       testPolyline: [
         [47.334852, -1.509485],
@@ -403,7 +403,7 @@ export default {
     &::-webkit-scrollbar-thumb {
       border-radius: 10px;
       -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
-      background-color: #2196f3;
+      background-color: var(--v-primary-base);
     }
   }
 }
