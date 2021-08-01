@@ -94,7 +94,7 @@
               >
               </l-icon>
               <marker-tooltip
-                :marker-info="markerUserLocation"
+                :marker-info="markerUserLocationProps"
                 @initChageLocation="manuallyChangeUserLocation"
               ></marker-tooltip>
             </l-marker>
@@ -119,6 +119,8 @@ import markerTooltip from '@/components/map/markers/markerTooltip'
 import slider from '@/components/slider/slider'
 import jobOffers from '@/services/jobOffers'
 import salaryScoring from '@/services/scoring/salaryScoring'
+import { mapActions, mapGetters } from 'vuex'
+
 export default {
   components: {
     jobCard,
@@ -135,13 +137,9 @@ export default {
         'https://{s}.basemaps.cartocdn.com/rastertiles/voyager_labels_under/{z}/{x}/{y}.png',
       urlMapboxStyle2:
         'https://api.mapbox.com/styles/v1/alexmaly/ckph4rwbn029g17p4b5pvvg3s/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoiYWxleG1hbHkiLCJhIjoiY2o1OGN5aXR0MHp1ODJ3cDN3cmI4a2dkbSJ9.uR1Bix3JXHGJkz1dxXt3NA',
-      userLocation: {
-        userLatitude: null,
-        userLongitude: null,
-      },
       userAddressInput: '',
       isUserLocationDialogOpen: false,
-      markerUserLocation: null,
+      markerUserLocationProps: null,
       homeLocationIcon: '',
       isJobRadiusRageActive: false,
       jobsRadiusRange: 25,
@@ -177,16 +175,11 @@ export default {
     }
   },
   computed: {
+    ...mapGetters(['userLocationLatLng', 'userLocationLat', 'userLocationLng']),
     userAddressInputFormatted() {
       return this.userAddressInput
         ? this.userAddressInput.replace(/ /g, '+')
         : ''
-    },
-    userLocationLatLng() {
-      if (this.userLocation?.userLatitude && this.userLocation?.userLongitude) {
-        return [this.userLocation.userLatitude, this.userLocation.userLongitude]
-      }
-      return null
     },
     jobOffersMaker() {
       if (this.isJobRadiusRageActive) {
@@ -201,7 +194,7 @@ export default {
     polylineCoords() {
       if (this.jobCoordsForRoute.length > 0) {
         return [
-          [this.userLocation.userLatitude, this.userLocation.userLongitude],
+          [this.userLocationLat, this.userLocationLng],
           this.jobCoordsForRoute,
         ]
       }
@@ -217,6 +210,10 @@ export default {
     }
   },
   methods: {
+    ...mapActions([
+      'updateUserGeoLocalization',
+      'updateUserGeoLocalizationLatLng',
+    ]),
     manuallyChangeUserLocation() {
       this.isUserLocationDialogOpen = true
     },
@@ -243,10 +240,7 @@ export default {
         if (!this.isJobRadiusRageActive) {
           return true
         }
-        return this.isInDistanceRadius(companyLocation, [
-          this.userLocation.userLatitude,
-          this.userLocation.userLongitude,
-        ])
+        return this.isInDistanceRadius(companyLocation, this.userLocationLatLng)
       }
       return false
     },
@@ -257,19 +251,14 @@ export default {
       )
     },
     getGeoLocalSuccess(position) {
-      this.userLocation.userLatitude = position.coords.latitude
-      this.userLocation.userLongitude = position.coords.longitude
-
-      this.markerUserLocation = this.createUserLocalizationMarker(
-        position.coords.latitude,
-        position.coords.longitude
-      )
+      this.$store.dispatch('updateUserGeoLocalization', position)
+      this.markerUserLocationProps = this.createUserLocalizationMarker(position)
     },
-    createUserLocalizationMarker(lat, lng) {
+    createUserLocalizationMarker(position) {
       return {
         id: 9999,
         type: 'userLocalization',
-        latLng: [lat, lng],
+        latLng: [position.coords.latitude, position.coords.longitude],
         ref: 'userMarker',
         active: true,
       }
@@ -287,7 +276,7 @@ export default {
         this.isInDistanceRadius(this.markers[0].latLng, this.userLocationLatLng)
       }
       const jobOfferLocalization = `${marker.latLng[1]},${marker.latLng[0]}`
-      const userLocalization = `${this.userLocation.userLongitude},${this.userLocation.userLatitude}`
+      const userLocalization = `${this.userLocationLng},${this.userLocationLat}`
       this.jobCoordsForRoute = [marker.latLng[0], marker.latLng[1]]
       const travelData = await fetch(
         `https://router.project-osrm.org/route/v1/driving/${jobOfferLocalization};${userLocalization}?overview=false`
@@ -364,8 +353,9 @@ export default {
         const result = await userAddressGeoLocal.json()
         const newUserAddress = result[0] ? [result[0].lat, result[0].lon] : null
         if (newUserAddress) {
-          this.userLocation.userLatitude = newUserAddress[0]
-          this.userLocation.userLongitude = newUserAddress[1]
+          await this.$store.dispatch('updateUserGeoLocalizationLatLng', {
+            ...newUserAddress,
+          })
         }
         this.userAddressInput = ''
         this.isUserLocationDialogOpen = false
