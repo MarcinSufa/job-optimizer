@@ -26,12 +26,7 @@
           </v-card-actions>
         </v-card>
       </v-dialog>
-      <v-card class="pa-3 mb-3">
-        <slider
-          @changeIsJobRadiusRageActive="changeIsJobRadiusRageActive"
-          @changeJobsRadiusRange="changeJobsRadiusRange"
-        />
-      </v-card>
+      <v-card class="pa-3 mb-3"> </v-card>
       <div class="cards-wrapper-inner pt-0">
         <v-expand-transition
           v-for="card in jobOffersMaker"
@@ -56,8 +51,17 @@
     </v-col>
     <v-col class="d-flex pt-0" cols="12" sm="12" md="6">
       <div class="map-wrapper map-container">
+        <slider
+          @changeIsJobRadiusRageActive="changeIsJobRadiusRageActive"
+          @changeJobsRadiusRange="changeJobsRadiusRange"
+        />
         <client-only>
-          <l-map ref="map" :zoom="11" :center="[52.2464418, 21.1277591]">
+          <l-map
+            ref="map"
+            class="leaflet-map-element"
+            :zoom="11"
+            :center="[52.2464418, 21.1277591]"
+          >
             <l-tile-layer :url="mapTileApi"> </l-tile-layer>
             <l-polyline
               v-if="polylineCoords"
@@ -380,6 +384,7 @@ export default {
 .map-container {
   height: 80vh;
   width: 50vw;
+  position: relative;
 }
 
 .cards-wrapper {
@@ -398,7 +403,7 @@ export default {
     &::-webkit-scrollbar-track {
       -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
       border-radius: 10px;
-      background-color: #f5f5f5;
+      background-color: var(--v-secondary-base);
     }
     &::-webkit-scrollbar-thumb {
       border-radius: 10px;
@@ -428,5 +433,9 @@ body::-webkit-scrollbar {
 
 .map-circle-job-range {
   stroke-width: 2;
+}
+
+.leaflet-map-element {
+  z-index: 0;
 }
 </style>

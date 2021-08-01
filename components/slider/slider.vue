@@ -37,6 +37,10 @@ export default {
 <style scoped lang="scss">
 .job-radius {
   &-wrapper {
+    position: absolute;
+    z-index: 10;
+    width: 50%;
+    left: 25%;
     flex: none;
     align-content: center;
     align-items: center;
