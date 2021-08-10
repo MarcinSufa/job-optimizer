@@ -8,6 +8,7 @@
       sm="12"
       md="6"
     >
+      <p>{{ averageJobSalaryPercent }}</p>
       <v-dialog v-model="isUserLocationDialogOpen" max-width="500">
         <v-card>
           <v-card-title>Localization</v-card-title>
@@ -26,7 +27,18 @@
           </v-card-actions>
         </v-card>
       </v-dialog>
-      <v-card class="pa-3 mb-3"> </v-card>
+      <v-card class="pa-3 mb-3">
+        <v-slider
+          :value="averageJobSalaryPercent"
+          class="job-radius-slider"
+          thumb-label="always"
+          label="%"
+          prepend-icon="mdi-radius"
+          inverse-label
+          :step="1"
+          @input="updateAverageSalaryPercent"
+        ></v-slider>
+      </v-card>
       <div class="cards-wrapper-inner pt-0">
         <v-expand-transition
           v-for="card in jobOffersMaker"
@@ -176,6 +188,12 @@ export default {
   },
   computed: {
     ...mapGetters(['userLocationLatLng', 'userLocationLat', 'userLocationLng']),
+    ...mapGetters({
+      averageSalaryPercent: 'scoring/averageSalaryPercent',
+    }),
+    averageJobSalaryPercent() {
+      return this.averageSalaryPercent
+    },
     userAddressInputFormatted() {
       return this.userAddressInput
         ? this.userAddressInput.replace(/ /g, '+')
@@ -214,6 +232,9 @@ export default {
       'updateUserGeoLocalization',
       'updateUserGeoLocalizationLatLng',
     ]),
+    updateAverageSalaryPercent(value) {
+      this.$store.dispatch('scoring/updateAverageSalaryPercent', value)
+    },
     manuallyChangeUserLocation() {
       this.isUserLocationDialogOpen = true
     },
