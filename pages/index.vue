@@ -51,6 +51,7 @@
               :job-data="card"
               :travel-time="card.commute.travelTime"
               :travel-distance="card.commute.distance"
+              :real-salary="card.scoring.salary.real"
               class="job-position-card"
               @showToltip="showToltip"
               @calculateOffer="calculateTravelTime"
@@ -366,6 +367,7 @@ export default {
         moneyLostOnCommute,
         moneyLostOnHolidays
       )
+
       this.updateRealSalary({ id: markerId, realSalary })
       this.enableScoring({ id: markerId, isEnabled: true })
     },

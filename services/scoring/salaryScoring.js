@@ -27,12 +27,12 @@ export default {
     moneyLostOnCommute,
     moneyLostOnHolidays
   ) {
-    return (
+    return Math.round(
       (this.yearlySalary(averageSalary) -
         moneyLostOnCommute -
         moneyLostOnHolidays) /
-      12
-    ).toFixed()
+        12
+    )
   },
 
   calculateLostMoneyOnHolidays(averageSalary, holidayPerYear) {

@@ -40,7 +40,7 @@
               {{ jobData.salary.min | formatShortThousandNumber }} -
               {{ jobData.salary.max | formatShortThousandNumber }}
               real salary
-              {{ jobData.scoring.salary.real | formatShortThousandNumber }}
+              {{ displayRealSalary | formatShortThousandNumber }}
             </div>
             <v-card-text>
               <div>
@@ -53,7 +53,7 @@
               </div>
               <div v-if="jobData.scoring.enabled">
                 Real Salary:
-                {{ jobData.scoring.salary.real | formatShortThousandNumber }}
+                {{ displayRealSalary | formatShortThousandNumber }}
               </div>
             </v-card-text>
           </div>
@@ -87,9 +87,22 @@ export default {
     },
   },
   props: {
-    jobData: Object,
-    travelTime: String,
-    travelDistance: String,
+    jobData: {
+      type: Object,
+      default: null,
+    },
+    travelTime: {
+      type: String,
+      default: '0',
+    },
+    travelDistance: {
+      type: String,
+      default: '0',
+    },
+    realSalary: {
+      type: Number,
+      default: 0,
+    },
   },
   data() {
     return {
@@ -97,6 +110,8 @@ export default {
       tweenTravelTime: this.travelTime,
       displayTravelDistance: this.travelDistance,
       tweenTravelDistance: this.travelDistance,
+      displayRealSalary: this.realSalary,
+      tweenRealSalary: this.realSalary,
     }
   },
   watch: {
@@ -113,6 +128,14 @@ export default {
         tweenTravelDistance: this.travelDistance,
         onUpdate: () => {
           this.displayTravelDistance = Math.ceil(this.tweenTravelDistance)
+        },
+      })
+    },
+    realSalary() {
+      this.$gsap.to(this, {
+        tweenRealSalary: this.jobData.scoring.salary.real,
+        onUpdate: () => {
+          this.displayRealSalary = Math.ceil(this.tweenRealSalary)
         },
       })
     },
