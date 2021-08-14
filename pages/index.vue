@@ -190,6 +190,7 @@ export default {
     ...mapGetters(['userLocationLatLng', 'userLocationLat', 'userLocationLng']),
     ...mapGetters({
       averageSalaryPercent: 'scoring/averageSalaryPercent',
+      jobOffers: 'jobOffers/jobOffers',
     }),
     averageJobSalaryPercent() {
       return this.averageSalaryPercent
@@ -201,13 +202,13 @@ export default {
     },
     jobOffersMaker() {
       if (this.isJobRadiusRageActive) {
-        return this.markers.filter(
+        return this.jobOffers.filter(
           (m) =>
             m.type === 'jobOffer' &&
             this.isInDistanceRadius(m.latLng, this.userLocationLatLng)
         )
       }
-      return this.markers
+      return this.jobOffers
     },
     polylineCoords() {
       if (this.jobCoordsForRoute.length > 0) {
@@ -232,6 +233,13 @@ export default {
       'updateUserGeoLocalization',
       'updateUserGeoLocalizationLatLng',
     ]),
+    ...mapActions({
+      updateAverageSalary: 'jobOffers/updateAverageSalary',
+      updateMoneyLostOnCommute: 'jobOffers/updateMoneyLostOnCommute',
+      updateMoneyLostOnHolidays: 'jobOffers/updateMoneyLostOnHolidays',
+      updateRealSalary: 'jobOffers/updateRealSalary',
+      enableScoring: 'jobOffers/enableScoring',
+    }),
     updateAverageSalaryPercent(value) {
       this.$store.dispatch('scoring/updateAverageSalaryPercent', value)
     },
@@ -300,42 +308,66 @@ export default {
       const userLocalization = `${this.userLocationLng},${this.userLocationLat}`
       this.jobCoordsForRoute = [marker.latLng[0], marker.latLng[1]]
       const travelData = await fetch(
-        `https://router.project-osrm.org/route/v1/driving/${jobOfferLocalization};${userLocalization}?overview=false`
+        `https://router.project-osrm.org/route/v1/driving/${jobOfferLocalization};${userLocalization}?overview=false`,
+        {
+          crossOrigin: 'anonymous',
+        }
       ).catch((error) => {
         console.log(error)
       })
       const data = await travelData.json()
-      const markerToUpdate = this.markers.find((m) => m.id === marker.id)
+      // const markerToUpdate = this.jobOffers.find((m) => m.id === marker.id)
       const markerCommuteData = data?.routes[0]
 
-      markerToUpdate.commute.travelTime = (
-        markerCommuteData.duration / 60
-      ).toFixed(0)
+      const markerId = marker.id
 
-      markerToUpdate.commute.distance = (
+      const estimatedTravelTime = (markerCommuteData.duration / 60).toFixed(0)
+      await this.$store.dispatch('jobOffers/updateCommuteTravelTime', {
+        id: markerId,
+        time: estimatedTravelTime,
+      })
+
+      const estimatedCommuteDistance = (
         markerCommuteData.distance / 1000
       ).toFixed(2)
 
+      await this.$store.dispatch('jobOffers/updateCommuteDistance', {
+        id: markerId,
+        distance: estimatedCommuteDistance,
+      })
+
       const averageSalary = salaryScoring.calculateSalaryForScoring(
-        marker.salary
+        marker.salary,
+        this.averageJobSalaryPercent
       )
+
+      this.updateAverageSalary({ id: markerId, salary: averageSalary })
+
       const moneyLostOnCommute = salaryScoring.calculateLostMoneyOnCommute(
         averageSalary,
         marker.commute.travelTime
       )
+      this.updateMoneyLostOnCommute({
+        id: markerId,
+        moneyLostYearly: moneyLostOnCommute,
+      })
 
       const moneyLostOnHolidays = salaryScoring.calculateLostMoneyOnHolidays(
         averageSalary,
         marker.holidays
       )
+      this.updateMoneyLostOnHolidays({
+        id: markerId,
+        moneyLostYearly: moneyLostOnHolidays,
+      })
 
-      markerToUpdate.scoring.salary.real =
-        salaryScoring.calculateRealYearlySalary(
-          averageSalary,
-          moneyLostOnCommute,
-          moneyLostOnHolidays
-        )
-      markerToUpdate.scoring.enabled = true
+      const realSalary = salaryScoring.calculateRealYearlySalary(
+        averageSalary,
+        moneyLostOnCommute,
+        moneyLostOnHolidays
+      )
+      this.updateRealSalary({ id: markerId, realSalary })
+      this.enableScoring({ id: markerId, isEnabled: true })
     },
 
     isInDistanceRadius(markerCoords, userCoords) {

@@ -43,8 +43,9 @@ export default {
     return remainingHolidayPerYear * this.dailySalary(averageSalary)
   },
 
-  calculateSalaryForScoring(salary, number = (salary.min + salary.max) / 2) {
-    return number
+  calculateSalaryForScoring(salary, percentage) {
+    const salaryRage = (salary.max - salary.min) * (percentage * 0.01)
+    return salary.min + salaryRage
   },
 
   calculateLostMoneyOnCommute(averageSalary, commuteTime) {
