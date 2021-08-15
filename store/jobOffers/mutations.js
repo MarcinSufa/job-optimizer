@@ -18,6 +18,6 @@ export default {
     offer.scoring.salary.real = realSalary
   },
   enableScoring(state, { offer, isEnabled }) {
-    offer.scoring.salary.enabled = isEnabled
+    offer.scoring.enabled = isEnabled
   },
 }
