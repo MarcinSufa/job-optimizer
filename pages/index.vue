@@ -8,7 +8,6 @@
       sm="12"
       md="6"
     >
-      <p>{{ averageJobSalaryPercent }}</p>
       <v-dialog v-model="isUserLocationDialogOpen" max-width="500">
         <v-card>
           <v-card-title>Localization</v-card-title>
@@ -33,8 +32,10 @@
           class="job-radius-slider"
           thumb-label="always"
           label="%"
-          prepend-icon="mdi-radius"
+          prepend-icon="mdi-currency-usd"
           inverse-label
+          hint="choose your salary expectation"
+          persistent-hint
           :step="1"
           @input="updateAverageSalaryPercent"
         ></v-slider>
