@@ -47,7 +47,7 @@
         >
           <div>
             <job-card
-              v-show="isMapObjectDefAndActive && isJobOfferActive(card.latLng)"
+              v-show="isMapMounted && isJobOfferActive(card.latLng)"
               :job-data="card"
               :travel-time="card.commute.travelTime"
               :travel-distance="card.commute.distance"
@@ -184,6 +184,7 @@ export default {
       },
       jobCoordsForRoute: [],
       travelType: 'driving',
+      mapMounted: false,
     }
   },
   computed: {
@@ -222,13 +223,16 @@ export default {
     mapTileApi() {
       return this.$vuetify.theme.dark ? this.darkMapTile : this.lightMapTile
     },
-    isMapObjectDefAndActive() {
-      return this.$refs.map !== undefined && this.$refs.map.mapObject
+    isMapMounted() {
+      return this.mapMounted
     },
   },
   mounted() {
     if (!this.userLocationLatLng) {
       this.getGeoLocalization()
+    }
+    if (this.isMapObjectDefAndActive) {
+      this.mapMounted = true
     }
   },
   methods: {
@@ -245,6 +249,9 @@ export default {
       enableJobError: 'jobOffers/enableJobError',
       changeErrorMessage: 'jobOffers/changeErrorMessage',
     }),
+    isMapObjectDefAndActive() {
+      return this.$refs.map !== undefined && this.$refs.map.mapObject
+    },
     updateAverageSalaryPercent(value) {
       this.$store.dispatch('scoring/updateAverageSalaryPercent', value)
     },
