@@ -240,6 +240,8 @@ export default {
       updateMoneyLostOnHolidays: 'jobOffers/updateMoneyLostOnHolidays',
       updateRealSalary: 'jobOffers/updateRealSalary',
       enableScoring: 'jobOffers/enableScoring',
+      enableJobError: 'jobOffers/enableJobError',
+      changeErrorMessage: 'jobOffers/changeErrorMessage',
     }),
     updateAverageSalaryPercent(value) {
       this.$store.dispatch('scoring/updateAverageSalaryPercent', value)
@@ -316,8 +318,19 @@ export default {
       ).catch((error) => {
         console.log(error)
       })
+
+      if (!travelData) {
+        this.fetchOsrmRouterError(true, marker.id)
+        return
+      }
+
       const data = await travelData.json()
-      // const markerToUpdate = this.jobOffers.find((m) => m.id === marker.id)
+
+      if (data.code !== 'Ok') {
+        this.fetchOsrmRouterError(true, marker.id)
+        return
+      }
+
       const markerCommuteData = data?.routes[0]
 
       const markerId = marker.id
@@ -371,7 +384,13 @@ export default {
       this.updateRealSalary({ id: markerId, realSalary })
       this.enableScoring({ id: markerId, isEnabled: true })
     },
-
+    fetchOsrmRouterError(isApiError, markerId) {
+      this.enableJobError({ id: markerId, isErrorEnabled: isApiError })
+      const errorMessage = isApiError
+        ? 'Sorry we have problem with server, please try later'
+        : ''
+      this.changeErrorMessage({ id: markerId, errorMessage })
+    },
     isInDistanceRadius(markerCoords, userCoords) {
       if (!this.$refs.map?.mapObject) {
         return false

@@ -27,4 +27,12 @@ export default {
     const offer = getters.mapJobOffer(id)
     commit('enableScoring', { offer, isEnabled })
   },
+  enableJobError({ commit, getters }, { id, isErrorEnabled }) {
+    const offer = getters.mapJobOffer(id)
+    commit('enableJobError', { offer, isErrorEnabled })
+  },
+  changeErrorMessage({ commit, getters }, { id, errorMessage }) {
+    const offer = getters.mapJobOffer(id)
+    commit('changeErrorMessage', { offer, errorMessage })
+  },
 }

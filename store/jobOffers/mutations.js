@@ -20,4 +20,10 @@ export default {
   enableScoring(state, { offer, isEnabled }) {
     offer.scoring.enabled = isEnabled
   },
+  enableJobError(state, { offer, isErrorEnabled }) {
+    offer.error.enabled = isErrorEnabled
+  },
+  changeErrorMessage(state, { offer, errorMessage }) {
+    offer.error.message = errorMessage
+  },
 }

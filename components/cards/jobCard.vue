@@ -5,6 +5,15 @@
       @mouseover="$emit('activeCard', jobData, true)"
       @mouseleave="$emit('activeCard', jobData, false)"
     >
+      <v-alert
+        v-if="jobData.error.enabled"
+        class="alert-box"
+        border="left"
+        dismissible
+        icon="mdi-alert-circle-outline"
+        type="error"
+        >{{ jobData.error.message }}</v-alert
+      >
       <div class="job-position-card-inner">
         <div>
           <v-img
@@ -172,6 +181,9 @@ export default {
     border: 1px deeppink solid;
     transition: border 0.5s ease-in;
   }
+}
+.alert-box {
+  z-index: 5;
 }
 .activeMarker {
   animation-name: bounce-1;

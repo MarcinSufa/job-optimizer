@@ -12,6 +12,10 @@ export default [
     contract: 'b2b',
     seniority: 'junior',
     address: 'Marszałkowska 45a',
+    error: {
+      enabled: false,
+      message: '',
+    },
     salary: {
       min: 13000,
       max: 17000,
@@ -49,6 +53,10 @@ export default [
     contract: 'b2b',
     seniority: 'mid',
     address: 'Marszałkowska 45a',
+    error: {
+      enabled: false,
+      message: '',
+    },
     salary: {
       min: 12000,
       max: 15000,
@@ -86,6 +94,10 @@ export default [
     contract: 'b2b',
     seniority: 'senior',
     address: 'Marszałkowska 45a',
+    error: {
+      enabled: false,
+      message: '',
+    },
     salary: {
       min: 15000,
       max: 23000,
