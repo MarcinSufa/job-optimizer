@@ -47,7 +47,7 @@
         >
           <div>
             <job-card
-              v-show="isJobOfferActive(card.latLng)"
+              v-show="isMapObjectDefAndActive && isJobOfferActive(card.latLng)"
               :job-data="card"
               :travel-time="card.commute.travelTime"
               :travel-distance="card.commute.distance"
@@ -107,6 +107,7 @@
               >
               </l-icon>
               <marker-tooltip
+                v-if="markerUserLocationProps"
                 :marker-info="markerUserLocationProps"
                 @initChageLocation="manuallyChangeUserLocation"
               ></marker-tooltip>
@@ -130,7 +131,6 @@
 import jobCard from '@/components/cards/jobCard'
 import markerTooltip from '@/components/map/markers/markerTooltip'
 import slider from '@/components/slider/slider'
-import jobOffers from '@/services/jobOffers'
 import salaryScoring from '@/services/scoring/salaryScoring'
 import { mapActions, mapGetters } from 'vuex'
 
@@ -168,7 +168,6 @@ export default {
       markerTimeTravel: {},
       iconSize: [32, 32],
       iconAnchor: [16, 16],
-      markers: jobOffers,
       polyline: {
         color: 'var(--v-primary-base)',
       },
@@ -223,6 +222,9 @@ export default {
     mapTileApi() {
       return this.$vuetify.theme.dark ? this.darkMapTile : this.lightMapTile
     },
+    isMapObjectDefAndActive() {
+      return this.$refs.map !== undefined && this.$refs.map.mapObject
+    },
   },
   mounted() {
     if (!this.userLocationLatLng) {
@@ -268,13 +270,10 @@ export default {
       this.jobsRadiusRange = rage
     },
     isJobOfferActive(companyLocation) {
-      if (this.$refs.map !== undefined && this.$refs.map.mapObject) {
-        if (!this.isJobRadiusRageActive) {
-          return true
-        }
-        return this.isInDistanceRadius(companyLocation, this.userLocationLatLng)
+      if (!this.isJobRadiusRageActive) {
+        return true
       }
-      return false
+      return this.isInDistanceRadius(companyLocation, this.userLocationLatLng)
     },
     getGeoLocalization() {
       navigator.geolocation.getCurrentPosition(
@@ -305,7 +304,10 @@ export default {
     },
     async calculateTravelTime(marker) {
       if (this.isJobRadiusRageActive && this.userLocationLatLng) {
-        this.isInDistanceRadius(this.markers[0].latLng, this.userLocationLatLng)
+        this.isInDistanceRadius(
+          this.jobOffers[0].latLng,
+          this.userLocationLatLng
+        )
       }
       const jobOfferLocalization = `${marker.latLng[1]},${marker.latLng[0]}`
       const userLocalization = `${this.userLocationLng},${this.userLocationLat}`
