@@ -1,4 +1,14 @@
 # joptimize
+JobBoard with calculated salaries
+
+### Features
+
+- Osmr commute time from user location to job address 
+- user location form browser or user input
+- map with job locations (open street maps)
+- circle radius filtering job offers by distance from user location
+- calulate job salaries - unpaid holidays - (commute time * per h salary)
+ 
 
 ## Build Setup
 
