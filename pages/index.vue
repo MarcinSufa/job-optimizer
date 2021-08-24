@@ -34,7 +34,7 @@
           label="%"
           prepend-icon="mdi-currency-usd"
           inverse-label
-          hint="choose your salary expectation"
+          hint="choose your salary expectations"
           persistent-hint
           :step="1"
           @input="updateAverageSalaryPercent"
