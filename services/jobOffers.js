@@ -3,7 +3,7 @@ export default [
     id: 1,
     companyLogo: 'icons/icon.png',
     type: 'jobOffer',
-    company: 'Aple',
+    company: 'Apple',
     jobTitle: 'Frontend developer',
     tech: ['javascript', 'react', 'webpack', '.net', 'sass'],
     description: 'We are looking for frontend dev',
@@ -11,7 +11,7 @@ export default [
     jobCategory: 'frontend',
     contract: 'b2b',
     seniority: 'junior',
-    address: 'Marszałkowska 45a',
+    address: 'Szeroka 12c',
     error: {
       enabled: false,
       message: '',
@@ -93,7 +93,7 @@ export default [
     jobCategory: 'frontend',
     contract: 'b2b',
     seniority: 'senior',
-    address: 'Marszałkowska 45a',
+    address: 'Obożna 7',
     error: {
       enabled: false,
       message: '',

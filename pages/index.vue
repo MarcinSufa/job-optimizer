@@ -143,41 +143,21 @@ export default {
   },
   data() {
     return {
-      mapApiKey:
-        'pk.eyJ1IjoiYWxleG1hbHkiLCJhIjoiY2o1OGN5aXR0MHp1ODJ3cDN3cmI4a2dkbSJ9.uR1Bix3JXHGJkz1dxXt3NA',
       darkMapTile:
         'https://{s}.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}.png',
       lightMapTile:
         'https://{s}.basemaps.cartocdn.com/rastertiles/voyager_labels_under/{z}/{x}/{y}.png',
-      urlMapboxStyle2:
-        'https://api.mapbox.com/styles/v1/alexmaly/ckph4rwbn029g17p4b5pvvg3s/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoiYWxleG1hbHkiLCJhIjoiY2o1OGN5aXR0MHp1ODJ3cDN3cmI4a2dkbSJ9.uR1Bix3JXHGJkz1dxXt3NA',
       userAddressInput: '',
       isUserLocationDialogOpen: false,
       markerUserLocationProps: null,
-      homeLocationIcon: '',
       isJobRadiusRageActive: false,
       jobsRadiusRange: 25,
-      mapGL: {},
-      routeData: null,
       error: null,
-      loading: false,
-      travel: {
-        duration: null,
-        type: null,
-      },
-      toggleRoute: false,
-      markerTimeTravel: {},
       iconSize: [32, 32],
       iconAnchor: [16, 16],
       polyline: {
         color: 'var(--v-primary-base)',
       },
-      testPolyline: [
-        [47.334852, -1.509485],
-        [47.342596, -1.328731],
-        [47.241487, -1.190568],
-        [47.234787, -1.358337],
-      ],
       travelTypes: {
         walking: 'walking',
         driving: 'driving',

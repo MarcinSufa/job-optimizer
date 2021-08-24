@@ -29,10 +29,10 @@
         disable-resize-watcher="true"
         @click.stop="drawer = !drawer"
       />
-      <v-btn icon @click.stop="miniVariant = !miniVariant">
-        <v-icon>mdi-{{ `chevron-${miniVariant ? 'right' : 'left'}` }}</v-icon>
-      </v-btn>
-      <v-toolbar-title v-text="title" />
+
+      <v-icon color="primary">mdi-rocket-launch</v-icon>
+
+      <v-toolbar-title class="ml-3 primary--text" v-text="title" />
 
       <v-spacer />
       <v-checkbox
@@ -63,12 +63,12 @@ export default {
       items: [
         {
           icon: 'mdi-apps',
-          title: 'Welcome',
+          title: 'Home',
           to: '/',
         },
         {
           icon: 'mdi-chart-bubble',
-          title: 'Inspire',
+          title: 'JobOffers',
           to: '/inspire',
         },
       ],
