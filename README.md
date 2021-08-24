@@ -8,6 +8,8 @@ JobBoard with calculated salaries
 - map with job locations (open street maps)
 - circle radius filtering job offers by distance from user location
 - calulate job salaries - unpaid holidays - (commute time * per h salary)
+
+[demo](https://gallant-jennings-5841bc.netlify.app/)
  
 
 ## Build Setup
